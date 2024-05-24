@@ -83,7 +83,7 @@ function Dashboard(){
                 })}
                
              </div>
-             <a href="#" onChange={(pageNumber)=>handlePageChange(pageNumber)}><Pagination id="pagination" showControls total={Math.ceil(products.length/9)} initialPage={1} /> </a>
+             <a href="#" ><Pagination id="pagination"   onChange={(pageNumber)=>handlePageChange(pageNumber)} showControls total={Math.ceil(products.length/9)} initialPage={1} /> </a>
           <Outlet/>
           </>)
 
