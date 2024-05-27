@@ -185,8 +185,8 @@ function Navigation(){
               </DropdownItem>:""}
               
               <DropdownItem key="logout"  color="danger" 
-              onPointerEnter={()=>{if(width<639){return handleLogout}}}
-              onClick={()=>{if(width>639){return handleLogout}}}>
+              onPointerEnter={()=>{if(width<639){return handleLogout()}}}
+              onClick={()=>{if(width>639){return handleLogout()}}}>
                     <Link to="/" >
                         Log Out
                     </Link>
