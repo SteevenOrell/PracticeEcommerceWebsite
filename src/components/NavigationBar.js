@@ -8,6 +8,7 @@ import {AcmeLogo} from "./AcmeLogo.js";
 import { UserData,SetUserData } from "./Login";
 
 
+
 function Navigation(){
 
     const [links,setLinks] = useState(["Men","Women","Kids","Accessories"]);
@@ -17,6 +18,7 @@ function Navigation(){
     const [searchInput,setSearchInput] = useState("")
     const navigate = useNavigate();
     const [isNotifDisplayed,setNotif] = useState(false);
+    let [dropdownItemDisplay,setDropdownItem ] = useState("");
     //console.log("User data Dashboard "+ UserData)
     
     // useEffect(()=>{
@@ -39,14 +41,39 @@ function Navigation(){
       
       window.addEventListener("resize", handleResize)
       
-      handleResize()
+      handleResize();
+      if(width < 639){
+        setDropdownItem( <>        
+          <DropdownItem key="settings" onPointerEnter={e=>handleDropdownClick(e)}><Link to="/edit-your-profile">My Account</Link></DropdownItem>   
+          { user != null && user["user-role"] == "admin"?<DropdownItem key="system" onPointerEnter={e=>handleDropdownClick(e)} ><Link to="/manage-users" >Manage Users {` (Admin only)`}</Link></DropdownItem> : ""}
+          
+          <DropdownItem key="logout"  color="danger" onPointerEnter={handleLogout}>
+            <Link to="/" >
+             Log Out
+             </Link>
+          </DropdownItem>
+          </>)   
+      }
+      else{
+        setDropdownItem( <>        
+          <DropdownItem key="settings" onClick={e=>handleDropdownClick(e)}><Link to="/edit-your-profile">My Account</Link></DropdownItem>   
+          { user != null && user["user-role"] == "admin"?<DropdownItem key="system" onClick={e=>handleDropdownClick(e)} ><Link to="/manage-users" >Manage Users {` (Admin only)`}</Link></DropdownItem> : ""}
+          
+          <DropdownItem key="logout"  color="danger" onClick={handleLogout}>
+            <Link to="/" >
+             Log Out
+             </Link>
+          </DropdownItem>
+          </>)
+
+      }
       
       return () => { 
         window.removeEventListener("resize", handleResize)
       }
       //window.innerWidth we can put it the array too
     },[])
-
+    
     function handleLogout(){
       //setNotif(true);
       setUser(null)
@@ -58,6 +85,16 @@ function Navigation(){
     function handleSearchData(e){
       setSearchInput(e.target.value);
       
+    }
+
+    function handleDropdownClick(e){
+      //console.log(e.target.innerText);
+      if(e.target.innerText == "Manage Users (Admin only)"){
+        navigate("/manage-users")
+      }
+      else if(e.target.innerText == "My Account"){
+        navigate("/edit-your-profile")
+      }
     }
     
     return (
@@ -131,14 +168,32 @@ function Navigation(){
               <p className="font-semibold">Signed in as</p>
               <p className="font-semibold">{user["email"]}</p>
             </DropdownItem>
-            <DropdownItem key="settings"><Link to="/edit-your-profile">My Account</Link></DropdownItem>
-            { user["user-role"] == "admin"?<DropdownItem key="system"><Link to="/manage-users" >Manage Users {` (Admin only)`}</Link></DropdownItem> : ""}
-            
-            <DropdownItem key="logout" color="danger" onClick={handleLogout}>
-              <Link to="/" >
-               Log Out
-               </Link>
-            </DropdownItem>
+          
+              <DropdownItem key="settings" 
+              onPointerEnter={ e=>{ if(width<639){return handleDropdownClick(e)}}}
+              onClick={ e=>{ if(width>639){return handleDropdownClick(e)}}}
+              >
+                  <Link to="/edit-your-profile">My Account</Link>
+              </DropdownItem>  
+
+              {user["user-role"] == "admin" ?
+              <DropdownItem key="system" 
+              onPointerEnter={ e=>{ if(width<639){return handleDropdownClick(e)}}}
+              onClick={ e=>{ if(width>639){return handleDropdownClick(e)}}} 
+              >
+                  <Link to="/manage-users" >Manage Users {` (Admin only)`}</Link>
+              </DropdownItem>:""}
+              
+              <DropdownItem key="logout"  color="danger" 
+              onPointerEnter={()=>{if(width<639){return handleLogout}}}
+              onClick={()=>{if(width>639){return handleLogout}}}>
+                    <Link to="/" >
+                        Log Out
+                    </Link>
+              </DropdownItem>
+    
+          
+          
             
           </DropdownMenu>
         </Dropdown> : "" }
