@@ -8,6 +8,8 @@ A CRUD APP working with API. Those are the features
 
 * View product details
 
+* Search product
+
 * Sign in and log out to account (with standard user role)
 
 * Edit Profile account

@@ -1,24 +1,28 @@
-import React, {useState, useEffect,useReducer} from "react";
+import React, {useState, useEffect,useReducer, useContext} from "react";
 import Axios from "axios";
 import { Outlet, Link, useNavigate} from "react-router-dom"
 import {  Navbar,   NavbarBrand,   NavbarContent,Button, Input,  NavbarItem, Link as NextUILink,Dropdown, DropdownTrigger, 
     DropdownMenu,DropdownItem,Avatar, NavbarMenuToggle,  NavbarMenu,  NavbarMenuItem} from "@nextui-org/react";
 import {SearchIcon} from "./SearchIcon.js";
 import {AcmeLogo} from "./AcmeLogo.js";
-import { UserData,SetUserData } from "./Login";
+import { UserContext } from "./UserContextComponent.js";
+import { SearchContext } from "./SearchDataComponent.js";
+//import { UserData,SetUserData } from "./Login";
 
 
 
 function Navigation(){
-
+    
+    const {user,setUser,logout}= useContext(UserContext);
+    const {searchData,setSearch} = useContext(SearchContext);
     const [links,setLinks] = useState(["Men","Women","Kids","Accessories"]);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [user,setUser] = useState(UserData)
+    //const [user,setUser] = useState(UserData)
     const [width,setWidth] = useState(window.innerWidth);
-    const [searchInput,setSearchInput] = useState("")
+    
     const navigate = useNavigate();
-    const [isNotifDisplayed,setNotif] = useState(false);
-    let [dropdownItemDisplay,setDropdownItem ] = useState("");
+
+    //console.log("Navigation User data "+ user)
     //console.log("User data Dashboard "+ UserData)
     
     // useEffect(()=>{
@@ -42,31 +46,7 @@ function Navigation(){
       window.addEventListener("resize", handleResize)
       
       handleResize();
-      if(width < 639){
-        setDropdownItem( <>        
-          <DropdownItem key="settings" onPointerEnter={e=>handleDropdownClick(e)}><Link to="/edit-your-profile">My Account</Link></DropdownItem>   
-          { user != null && user["user-role"] == "admin"?<DropdownItem key="system" onPointerEnter={e=>handleDropdownClick(e)} ><Link to="/manage-users" >Manage Users {` (Admin only)`}</Link></DropdownItem> : ""}
-          
-          <DropdownItem key="logout"  color="danger" onPointerEnter={handleLogout}>
-            <Link to="/" >
-             Log Out
-             </Link>
-          </DropdownItem>
-          </>)   
-      }
-      else{
-        setDropdownItem( <>        
-          <DropdownItem key="settings" onClick={e=>handleDropdownClick(e)}><Link to="/edit-your-profile">My Account</Link></DropdownItem>   
-          { user != null && user["user-role"] == "admin"?<DropdownItem key="system" onClick={e=>handleDropdownClick(e)} ><Link to="/manage-users" >Manage Users {` (Admin only)`}</Link></DropdownItem> : ""}
-          
-          <DropdownItem key="logout"  color="danger" onClick={handleLogout}>
-            <Link to="/" >
-             Log Out
-             </Link>
-          </DropdownItem>
-          </>)
 
-      }
       
       return () => { 
         window.removeEventListener("resize", handleResize)
@@ -76,16 +56,13 @@ function Navigation(){
     
     function handleLogout(){
       //setNotif(true);
-      setUser(null)
-      SetUserData(null);
-      navigate("/")
-      
-      
-    }
-    function handleSearchData(e){
-      setSearchInput(e.target.value);
+      //setUser(null)
+      logout();
+      navigate("/login")
+      //console.log("Navigation User data "+ user)
       
     }
+
 
     function handleDropdownClick(e){
       //console.log(e.target.innerText);
@@ -96,12 +73,16 @@ function Navigation(){
         navigate("/edit-your-profile")
       }
     }
-    
+
+    function handleSeachTyping(e){
+      //console.log(e.target.value);
+      setSearch(e.target.value)
+    }
     return (
       <>
-      {user == null ? <Navbar ><Link to="/login" id="FirstNavBar" className="text-white-900 hover:text-blue-500">Sign in </Link></Navbar>:""}
-      <Navbar isBordered isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen}>
-        <NavbarContent className="sm:hidden" justify="start">
+        {user == null && width > 639? <Navbar ><Link to="/login" id="FirstNavBar" className="text-white-900 hover:text-blue-500">Sign in </Link></Navbar>:""}
+       <Navbar isBordered isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen}>
+       <NavbarContent className="sm:hidden" justify="start">
             <NavbarMenuToggle aria-label={isMenuOpen ? "Close menu" : "Open menu"} />
         </NavbarContent>
 
@@ -124,9 +105,10 @@ function Navigation(){
       <NavbarContent className="hidden sm:flex gap-3" justify="center">
 
 
+        
           { links.map((link)=>{
                return (
-               <NavbarItem>
+               <NavbarItem key={`key${link}`}>
                <NextUILink color="foreground" href="#">
                  {link}
                </NextUILink>
@@ -139,6 +121,7 @@ function Navigation(){
 
       <NavbarContent as="div" className="items-center" justify="end">
         <Input
+          onChange={(e)=>handleSeachTyping(e)}
           classNames={{
             base: "max-w-full sm:max-w-[10rem] h-10",
             mainWrapper: "h-full",
@@ -149,7 +132,7 @@ function Navigation(){
           size="sm"
           startContent={<SearchIcon size={18} />}
           type="search"
-          onChange={(e)=>{handleSearchData(e)}}
+        
         />
         { user != null ? <Dropdown placement="bottom-end">
           <DropdownTrigger>
@@ -199,6 +182,26 @@ function Navigation(){
         </Dropdown> : "" }
 
         <NavbarMenu>
+          {
+            user == null && width < 639 ? 
+              <NavbarMenuItem key={`mobile-SignIn`} 
+              onPointerEnter={()=>{if(width<639){return handleLogout()}}}
+              onClick={()=>{if(width>639){return handleLogout()}}}>
+                <Link to="/login">
+                  <NextUILink
+                    className="w-full"
+                    color="secondary"
+                    href="#"
+                    size="lg"
+                  >
+                    Sign In
+                  </NextUILink>
+                </Link>
+              </NavbarMenuItem>
+            :
+            <></>
+
+          }
             {links.map((item, index) => (
               <NavbarMenuItem key={`${item}-${index}`}>
                 <NextUILink

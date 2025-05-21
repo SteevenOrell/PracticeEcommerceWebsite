@@ -42,7 +42,7 @@ function Details(){
         }
     },[])
     return (<>
-    <Navigation/>
+    {/* <Navigation/> */}
     <div >
       <div className="pt-6">
 

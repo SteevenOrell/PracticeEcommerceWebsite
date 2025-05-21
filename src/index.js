@@ -5,13 +5,16 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {NextUIProvider} from "@nextui-org/react";
 import {ThemeProvider as NextThemesProvider} from "next-themes";
+import { BrowserRouter } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <NextUIProvider >
       <NextThemesProvider attribute='class' defaultTheme='dark'> 
-        <App />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </NextThemesProvider>
     </NextUIProvider>
   </React.StrictMode>
