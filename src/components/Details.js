@@ -1,6 +1,7 @@
-import {React, useState,useEffect}  from "react";
+import {React, useState,useEffect, useContext}  from "react";
 import Navigation from './NavigationBar';
 import { Outlet, Link, useParams,useNavigate} from "react-router-dom";
+import { CartContext } from "./CartContextComponent";
 import { StarIcon } from '@heroicons/react/20/solid';
 import { RadioGroup } from '@headlessui/react';
 
@@ -13,6 +14,8 @@ function classNames(...classes) {
 function Details(){
     const [product,setProduct] = useState({})
     const [images,setImages] = useState([])
+    const [qty, setQty] = useState(1);
+    const { addToCart } = useContext(CartContext);
     const navigate = useNavigate();
     
     
@@ -109,7 +112,7 @@ function Details(){
                   ))}
                 </div>
                 <p className="sr-only">{reviews.average} out of 5 stars</p>
-                <a href={reviews.href} className="ml-3 text-sm font-medium text-blue-600 hover:text-indigo-500">
+                <a href={reviews.href} className="ml-3 text-sm font-medium text-gray-600 hover:text-gray-500">
                   {reviews.totalCount} reviews
                 </a>
               </div>
@@ -117,7 +120,7 @@ function Details(){
 
             <form className="mt-10">
             <div>
-                <h3 className="text-sm font-medium text-blue-900">Color</h3>
+                <h3 className="text-sm font-medium text-gray-300">Color</h3>
                   <p> {product.color}</p>
 
               </div>   
@@ -128,8 +131,8 @@ function Details(){
               {/* Sizes */}
               <div className="mt-10">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-blue-900">Size</h3>
-                  <a href="#" className="text-sm font-medium text-blue-600 hover:text-indigo-500">
+                  <h3 className="text-sm font-medium text-gray-300">Size</h3>
+                  <a href="#" className="text-sm font-medium text-gray-600 hover:text-gray-500">
                     Size guide
                   </a>
                 </div>
@@ -152,10 +155,16 @@ function Details(){
                 </RadioGroup>
               </div>
 
+              <div className="DetailsQtySelector">
+                <button type="button" onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
+                <span>{qty}</span>
+                <button type="button" onClick={() => setQty(q => q + 1)}>+</button>
+              </div>
+
               <button
                 type="submit"
-                className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-blue-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  onClick={e=>{e.preventDefault()}}
+                className="mt-4 flex w-full items-center justify-center rounded-md border border-transparent bg-gray-700 px-8 py-3 text-base font-medium text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                onClick={e => { e.preventDefault(); addToCart(product, qty); }}
               >
                 Add to bag
               </button>

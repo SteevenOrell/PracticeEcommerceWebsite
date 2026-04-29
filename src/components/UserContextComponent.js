@@ -21,18 +21,14 @@ function UserContextComponent({children}){
         }
   }, []);
 
-    const setUser = (userData)=>{
-        if(userData){
-            //console.log("User login "+ JSON.stringify(userData))
-            localStorage.setItem("userData",JSON.stringify(userData))
+    const setUser = (userData) => {
+        if (userData) {
+            localStorage.setItem("userData", JSON.stringify(userData));
             setDataUser(userData);
-        }
-        else{
+        } else {
             localStorage.removeItem('userData');
-      
+            setDataUser(null);
         }
-
-
     }
 
     const logout = () =>{

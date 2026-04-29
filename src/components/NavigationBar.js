@@ -1,229 +1,298 @@
-import React, {useState, useEffect,useReducer, useContext} from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Axios from "axios";
-import { Outlet, Link, useNavigate} from "react-router-dom"
-import {  Navbar,   NavbarBrand,   NavbarContent,Button, Input,  NavbarItem, Link as NextUILink,Dropdown, DropdownTrigger, 
-    DropdownMenu,DropdownItem,Avatar, NavbarMenuToggle,  NavbarMenu,  NavbarMenuItem} from "@nextui-org/react";
-import {SearchIcon} from "./SearchIcon.js";
-import {AcmeLogo} from "./AcmeLogo.js";
+import { Outlet, Link, useNavigate } from "react-router-dom";
+import {
+    Navbar, NavbarBrand, NavbarContent, Input, NavbarItem,
+    Link as NextUILink, Dropdown, DropdownTrigger, DropdownMenu,
+    DropdownItem, Avatar, NavbarMenuToggle, NavbarMenu, NavbarMenuItem
+} from "@nextui-org/react";
+import { SearchIcon } from "./SearchIcon.js";
+import { AcmeLogo } from "./AcmeLogo.js";
 import { UserContext } from "./UserContextComponent.js";
 import { SearchContext } from "./SearchDataComponent.js";
-//import { UserData,SetUserData } from "./Login";
+import { CartContext } from "./CartContextComponent.js";
 
-
-
-function Navigation(){
-    
-    const {user,setUser,logout}= useContext(UserContext);
-    const {searchData,setSearch} = useContext(SearchContext);
-    const [links,setLinks] = useState(["Men","Women","Kids","Accessories"]);
+function Navigation() {
+    const { user, logout } = useContext(UserContext);
+    const { setSearch } = useContext(SearchContext);
+    const { cartCount, openSidebar } = useContext(CartContext);
+    const [links] = useState(["Men", "Women", "Kids", "Accessories"]);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    //const [user,setUser] = useState(UserData)
-    const [width,setWidth] = useState(window.innerWidth);
-    
+    const [products, setProducts] = useState([]);
+    const [productsFound, setProductsFound] = useState([]);
+    const [isSearchDataFound, setSearchDataFound] = useState(true);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [width, setWidth] = useState(window.innerWidth);
+
     const navigate = useNavigate();
 
-    //console.log("Navigation User data "+ user)
-    //console.log("User data Dashboard "+ UserData)
-    
-    // useEffect(()=>{
-    //     Axios.get("https://fakestoreapi.com/products/categories")
-    //     //.then(res=>JSON.parse(res.data))
-    //     .then(res=>{
-    //       if(res.data.length !== links.length)
-    //         console.log(`Nav bar changed => ${res.data}`)
-    //         //setLinks(res.data);
-            
-    //     })
-    // },[]);
-    useEffect(()=>{
+    useEffect(() => {
+        Axios.get("https://6648f7ef4032b1331becf0f2.mockapi.io/products")
+            .then((res) => {
+                if (res.data.length > 0) setProducts(res.data);
+            });
+    }, []);
 
-      //setUser(UserData)
-      
-      function handleResize() {
-        setWidth(window.innerWidth)
-      }
-      
-      window.addEventListener("resize", handleResize)
-      
-      handleResize();
+    useEffect(() => {
+        function handleResize() { setWidth(window.innerWidth); }
+        window.addEventListener("resize", handleResize);
+        handleResize();
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
-      
-      return () => { 
-        window.removeEventListener("resize", handleResize)
-      }
-      //window.innerWidth we can put it the array too
-    },[])
-    
-    function handleLogout(){
-      //setNotif(true);
-      //setUser(null)
-      logout();
-      navigate("/login")
-      //console.log("Navigation User data "+ user)
-      
+    useEffect(() => {
+        if (isSearchOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => { document.body.style.overflow = ""; };
+    }, [isSearchOpen]);
+
+    function handleLogout() {
+        logout();
+        navigate("/login");
     }
 
-
-    function handleDropdownClick(e){
-      //console.log(e.target.innerText);
-      if(e.target.innerText == "Manage Users (Admin only)"){
-        navigate("/manage-users")
-      }
-      else if(e.target.innerText == "My Account"){
-        navigate("/edit-your-profile")
-      }
+    function handleDropdownClick(e) {
+        if (e.target.innerText === "Manage Users (Admin only)") navigate("/manage-users");
+        else if (e.target.innerText === "My Account") navigate("/edit-your-profile");
     }
 
-    function handleSeachTyping(e){
-      //console.log(e.target.value);
-      setSearch(e.target.value)
+    function handleOverlaySearch(e) {
+        const val = e.target.value;
+        setSearchQuery(val);
+        setSearch(val);
+
+        if (val.trim() === "") {
+            setProductsFound([]);
+            setSearchDataFound(true);
+            return;
+        }
+
+        const results = products.filter(item =>
+            item["article-name"].toLowerCase().includes(val.toLowerCase())
+        );
+
+        if (results.length > 0) {
+            setProductsFound(results.slice(0, 4));
+            setSearchDataFound(true);
+        } else {
+            setProductsFound([]);
+            setSearchDataFound(false);
+        }
     }
+
+    function handleCancel() {
+        setIsSearchOpen(false);
+        setSearchQuery("");
+        setSearch("");
+        setProductsFound([]);
+        setSearchDataFound(true);
+    }
+
+    function getProductImage(folderName) {
+        try {
+            return require(`../assets/products-images/${folderName}/image1.png`);
+        } catch {
+            return null;
+        }
+    }
+
     return (
-      <>
-        {user == null && width > 639? <Navbar ><Link to="/login" id="FirstNavBar" className="text-white-900 hover:text-blue-500">Sign in </Link></Navbar>:""}
-       <Navbar isBordered isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen}>
-       <NavbarContent className="sm:hidden" justify="start">
-            <NavbarMenuToggle aria-label={isMenuOpen ? "Close menu" : "Open menu"} />
-        </NavbarContent>
+        <>
+            {isSearchOpen && <div id="SearchBackdrop" onClick={handleCancel} />}
 
-        {width < 639 ? 
-        <NavbarContent className="sm:hidden pr-3" justify="center">
-        <NavbarBrand>
-            <Link to="/" >
-              <AcmeLogo />
-            </Link>
-        </NavbarBrand>
-      </NavbarContent> :       
-      <NavbarContent justify="start">
-          <NavbarBrand className="mr-4" justify="center">
-              <Link to="/" >
-                <AcmeLogo />
-              </Link>
-          </NavbarBrand>
-      </NavbarContent> }
+            {isSearchOpen && (
+                <div id="SearchOverlay">
+                    <div id="SearchOverlayHeader">
+                        <Link to="/" onClick={handleCancel} id="SearchOverlayLogo">
+                            <AcmeLogo />
+                        </Link>                        
+                        <Input
+                            autoFocus
+                            value={searchQuery}
+                            onChange={handleOverlaySearch}
+                            classNames={{
+                                base: "flex-1 h-12",
+                                mainWrapper: "h-full",
+                                input: "text-base",
+                                inputWrapper: "h-full font-normal text-white bg-white/10 border border-white/20",
+                            }}
+                            placeholder="Search products..."
+                            size="md"
+                            startContent={<SearchIcon size={20} />}
+                            type="search"
+                        />
+                        <button id="SearchCancelBtn" onClick={handleCancel}>Cancel</button>
 
-      <NavbarContent className="hidden sm:flex gap-3" justify="center">
+                    </div>
+
+                    <div id="SearchResults">
+                        {searchQuery.trim() !== "" && !isSearchDataFound && (
+                            <p id="SearchNotFound">Product not found</p>
+                        )}
+                        {productsFound.length > 0 && (
+                            <div id="SearchResultsGrid">
+                                {productsFound.map(product => (
+                                    <Link
+                                        to={`/details/${product.id}`}
+                                        key={product.id}
+                                        onClick={handleCancel}
+                                        className="SearchProductCard"
+                                    >
+                                        <div className="SearchProductImgWrapper">
+                                            <img
+                                                src={getProductImage(product["image-folder-name"])}
+                                                alt={product["article-name"]}
+                                            />
+                                        </div>
+                                        <p className="SearchProductName">{product["article-name"]}</p>
+                                        <p className="SearchProductPrice">${product.price}</p>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            <Navbar isBordered isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen} className="main-nav" classNames={{ wrapper: "px-8 max-w-full h-full" }}>
+                <NavbarContent className="sm:hidden" justify="start">
+                    <NavbarMenuToggle aria-label={isMenuOpen ? "Close menu" : "Open menu"} />
+                </NavbarContent>
+                <NavbarContent className="hidden sm:flex gap-3" justify="start">
+                    {links.map((link) => (
+                      
+                        <NavbarItem key={`key${link}`}>
+                            <NextUILink color="foreground" href="/products">{link}</NextUILink>
+                        </NavbarItem>
+                     
+                    ))}
+                </NavbarContent>
+                {width < 639
+                    ? <NavbarContent className="sm:hidden pr-3" justify="center">
+                        <NavbarBrand>
+                            <Link to="/"><AcmeLogo /></Link>
+                        </NavbarBrand>
+                    </NavbarContent>
+                    : <NavbarContent justify="center">
+                        <NavbarBrand>
+                            <Link to="/"><AcmeLogo /></Link>
+                        </NavbarBrand>
+                    </NavbarContent>
+                }
 
 
-        
-          { links.map((link)=>{
-               return (
-               <NavbarItem key={`key${link}`}>
-               <NextUILink color="foreground" href="#">
-                 {link}
-               </NextUILink>
-             </NavbarItem>) 
-              }) 
-          }
 
-       
-      </NavbarContent>
+                <NavbarContent as="div" className="items-center" justify="end">
+                    {user == null && width >639
+                        ? <Link to="/login" className="text-sm font-medium text-default-600 hover:text-default-900 whitespace-nowrap">Sign in</Link>
+                        : ""}
 
-      <NavbarContent as="div" className="items-center" justify="end">
-        <Input
-          onChange={(e)=>handleSeachTyping(e)}
-          classNames={{
-            base: "max-w-full sm:max-w-[10rem] h-10",
-            mainWrapper: "h-full",
-            input: "text-small",
-            inputWrapper: "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
-          }}
-          placeholder="Type to search..."
-          size="sm"
-          startContent={<SearchIcon size={18} />}
-          type="search"
-        
-        />
-        { user != null ? <Dropdown placement="bottom-end">
-          <DropdownTrigger>
-            <Avatar
-              isBordered
-              as="button"
-              className="transition-transform"
-              color="secondary"
-              name={user["name"]}
-              size="sm"
-              src={user["avatar"]}
-            />
-          </DropdownTrigger>
-          <DropdownMenu aria-label="Profile Actions" variant="flat">
-            <DropdownItem key="profile" className="h-14 gap-2">
-              <p className="font-semibold">Signed in as</p>
-              <p className="font-semibold">{user["email"]}</p>
-            </DropdownItem>
-          
-              <DropdownItem key="settings" 
-              onPointerEnter={ e=>{ if(width<639){return handleDropdownClick(e)}}}
-              onClick={ e=>{ if(width>639){return handleDropdownClick(e)}}}
-              >
-                  <Link to="/edit-your-profile">My Account</Link>
-              </DropdownItem>  
+                    {width < 639 && user == null
+                        ? <button id="NavSearchIconBtn" onClick={() => setIsSearchOpen(true)}>
+                            <SearchIcon size={22} />
+                          </button>
+                        : width >= 639
+                            ? <Input
+                                onClick={() => setIsSearchOpen(true)}
+                                onFocus={() => setIsSearchOpen(true)}
+                                readOnly
+                                classNames={{
+                                    base: "max-w-full sm:max-w-[10rem] h-10 cursor-pointer",
+                                    mainWrapper: "h-full",
+                                    input: "text-small cursor-pointer",
+                                    inputWrapper: "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20 cursor-pointer",
+                                }}
+                                placeholder="Search..."
+                                size="sm"
+                                startContent={<SearchIcon size={18} />}
+                                type="search"
+                              />
+                            : null
+                    }
 
-              {user["user-role"] == "admin" ?
-              <DropdownItem key="system" 
-              onPointerEnter={ e=>{ if(width<639){return handleDropdownClick(e)}}}
-              onClick={ e=>{ if(width>639){return handleDropdownClick(e)}}} 
-              >
-                  <Link to="/manage-users" >Manage Users {` (Admin only)`}</Link>
-              </DropdownItem>:""}
-              
-              <DropdownItem key="logout"  color="danger" 
-              onPointerEnter={()=>{if(width<639){return handleLogout()}}}
-              onClick={()=>{if(width>639){return handleLogout()}}}>
-                    <Link to="/" >
-                        Log Out
-                    </Link>
-              </DropdownItem>
-    
-          
-          
-            
-          </DropdownMenu>
-        </Dropdown> : "" }
+                    <button id="CartIconWrapper" onClick={openSidebar}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width={24} height={24}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                        </svg>
+                        {cartCount > 0 && <span id="CartBadge">{cartCount}</span>}
+                    </button>
 
-        <NavbarMenu>
-          {
-            user == null && width < 639 ? 
-              <NavbarMenuItem key={`mobile-SignIn`} 
-              onPointerEnter={()=>{if(width<639){return handleLogout()}}}
-              onClick={()=>{if(width>639){return handleLogout()}}}>
-                <Link to="/login">
-                  <NextUILink
-                    className="w-full"
-                    color="secondary"
-                    href="#"
-                    size="lg"
-                  >
-                    Sign In
-                  </NextUILink>
-                </Link>
-              </NavbarMenuItem>
-            :
-            <></>
+                    {user != null
+                        ? <Dropdown placement="bottom-end">
+                            <DropdownTrigger>
+                                <Avatar
+                                    isBordered
+                                    as="button"
+                                    className="transition-transform"
+                                    color="default"
+                                    name={user["name"]}
+                                    size="sm"
+                                    src={user["avatar"]}
+                                />
+                            </DropdownTrigger>
+                            <DropdownMenu aria-label="Profile Actions" variant="flat">
+                                <DropdownItem key="profile" className="h-14 gap-2">
+                                    <p className="font-semibold">Signed in as</p>
+                                    <p className="font-semibold">{user["email"]}</p>
+                                </DropdownItem>
+                                <DropdownItem key="settings"
+                                    onPointerEnter={e => { if (width < 639) handleDropdownClick(e); }}
+                                    onClick={e => { if (width > 639) handleDropdownClick(e); }}
+                                >
+                                    <Link to="/edit-your-profile">My Account</Link>
+                                </DropdownItem>
+                                {user["user-role"] === "admin"
+                                    ? <DropdownItem key="system"
+                                        onPointerEnter={e => { if (width < 639) handleDropdownClick(e); }}
+                                        onClick={e => { if (width > 639) handleDropdownClick(e); }}
+                                    >
+                                        <Link to="/manage-users">Manage Users {` (Admin only)`}</Link>
+                                    </DropdownItem>
+                                    : ""}
+                                <DropdownItem key="logout" color="danger" onClick={handleLogout}>
+                                    Log Out
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
+                        : ""}
 
-          }
-            {links.map((item, index) => (
-              <NavbarMenuItem key={`${item}-${index}`}>
-                <NextUILink
-                  className="w-full"
-                  color="foreground"
-                  href="#"
-                  size="lg"
-                >
-                  {item}
-                </NextUILink>
-              </NavbarMenuItem>
-            ))}
-      </NavbarMenu>
-      </NavbarContent>
-      <Outlet/>
-    </Navbar>
-    
-    
-    </>      
-    )
-
+                    <NavbarMenu className="z-30 px-6 pt-6 fixed flex max-w-full top-[var(--navbar-height)] inset-x-0 bottom-0 w-screen flex-col gap-2 overflow-y-auto backdrop-blur-xl backdrop-saturate-150 bg-background/70">
+                        {user == null
+                            ? <NavbarMenuItem key="mobile-SignIn">
+                                <Link to="/login">
+                                    <NextUILink className="w-full" color="foreground" href="/login" size="lg">
+                                        Sign In
+                                    </NextUILink>
+                                </Link>
+                              </NavbarMenuItem>
+                            : <NavbarMenuItem key="mobile-Search">
+                                <button
+                                    id="MobileMenuSearchBtn"
+                                    onClick={() => { setIsSearchOpen(true); setIsMenuOpen(false); }}
+                                >
+                                    Search <SearchIcon size={20} />
+                                </button>
+                              </NavbarMenuItem>
+                        }
+                        {links.map((item, index) => (
+                            <NavbarMenuItem key={`${item}-${index}`}>
+                              
+                                <NextUILink className="w-full" color="foreground" href="/products" size="lg">
+                                    {item}
+                                </NextUILink>
+                              
+                            </NavbarMenuItem>
+                        ))}
+                    </NavbarMenu>
+                </NavbarContent>
+                <Outlet />
+            </Navbar>
+        </>
+    );
 }
-
 
 export default Navigation;

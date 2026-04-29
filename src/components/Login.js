@@ -98,7 +98,7 @@ function Login(){
                     <p className="mt-1 text-sm text-white-500">Please enter correct credentials</p>
                 </div>
                 <div className="ml-4 flex flex-shrink-0">
-                    <button type="button" className="inline-flex rounded-md bg-red text-white-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" onClick={()=>setNotif(false)}>
+                    <button type="button" className="inline-flex rounded-md bg-red text-white-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2" onClick={()=>setNotif(false)}>
                     <span className="sr-only" >Close</span>
                     <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
@@ -134,7 +134,7 @@ function Login(){
               autoComplete="email"
               onChange={e=>handleEmailChange(e)}
               required
-              className="block w-full rounded-md border-0 py-1.5 text-white-900 shadow-sm ring-1 ring-inset ring-white-300 placeholder:text-white-400 focus:ring-2 focus:ring-inset focus:ring-white-600 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 px-3 py-2.5 text-white-900 shadow-sm ring-1 ring-inset ring-white-300 placeholder:text-white-400 focus:ring-2 focus:ring-inset focus:ring-white-600 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -145,7 +145,7 @@ function Login(){
               Password
             </label>
             <div className="text-sm">
-              <a href="#" className="font-semibold text-blue-600 hover:text-indigo-500">
+              <a href="#" className="font-semibold text-gray-400 hover:text-gray-300">
                 Forgot password?
               </a>
             </div>
@@ -159,7 +159,7 @@ function Login(){
               autoComplete="current-password"
               onChange={e=>handlePasswordChange(e)}
               required
-              className="block w-full rounded-md border-0 py-1.5 text-white-900 shadow-sm ring-1 ring-inset ring-white-300 placeholder:text-white-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 px-3 py-2.5 text-white-900 shadow-sm ring-1 ring-inset ring-white-300 placeholder:text-white-400 focus:ring-2 focus:ring-inset focus:ring-gray-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -168,7 +168,7 @@ function Login(){
           <Link to="/">
           <button
             type="submit"
-            className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            className="flex w-full justify-center rounded-md bg-gray-700 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
             onClick={(e)=>handleSubmitClicked(e)}
             >
             Sign in

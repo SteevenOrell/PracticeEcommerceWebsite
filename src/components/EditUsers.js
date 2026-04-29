@@ -108,20 +108,20 @@ function EditUsers(){
         {isNotifDisplayed ?  (<div id="NotificationEditProfile" aria-live="assertive"  className="fixed flex items-center w-full max-w-xs p-4 space-x-4 text-white-500 bg-dark divide-x rtl:divide-x-reverse divide-white-200 rounded-lg shadow bottom-5 left-5 dark:text-dark-400 dark:divide-gray-700 space-x dark:bg-dark-800">
         <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
             
-            <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-black shadow-lg ring-1 ring-blue ring-opacity-5">
+            <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-black shadow-lg ring-1 ring-gray-500 ring-opacity-5">
             <div className="p-4">
                 <div className="flex items-start">
                 <div className="flex-shrink-0">
-                    <svg className="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
                 <div className="ml-3 w-0 flex-1 pt-0.5">
                     <p className="text-sm font-medium text-white-900">Update user</p>
-                    <p className="mt-1 text-sm text-blue-500">{ displayedMessage }</p>
+                    <p className="mt-1 text-sm text-gray-400">{ displayedMessage }</p>
                 </div>
                 <div className="ml-4 flex flex-shrink-0">
-                    <button type="button" className="inline-flex rounded-md bg-red text-white-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" onClick={()=>setNotif(false)}>
+                    <button type="button" className="inline-flex rounded-md bg-red text-white-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2" onClick={()=>setNotif(false)}>
                     <span className="sr-only" >Close</span>
                     <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
@@ -154,7 +154,7 @@ function EditUsers(){
                                 {detail[0]}
                             </label>
                             <div className="mt-2">
-                                <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-white-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-600 sm:max-w-md">
+                                <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-white-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-gray-500 sm:max-w-md">
                                     <span className="flex select-none items-center pl-3 text-white-500 sm:text-sm">{detail[1]}</span>
                                     <input
                                     type={["email","password"].includes(detail[0].toLowerCase()) ? detail[0].toLowerCase() : "text" }
@@ -184,7 +184,7 @@ function EditUsers(){
             </button>
             <button
                 type="submit"
-                className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="rounded-md bg-gray-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
                 onClick={e=>handleProfileUpdate(e)}
             >
                 Save
