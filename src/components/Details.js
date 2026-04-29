@@ -15,6 +15,7 @@ function Details(){
     const [product,setProduct] = useState({})
     const [images,setImages] = useState([])
     const [qty, setQty] = useState(1);
+    const [currentSlide, setCurrentSlide] = useState(0);
     const { addToCart } = useContext(CartContext);
     const navigate = useNavigate();
     
@@ -50,7 +51,81 @@ function Details(){
       <div className="pt-6">
 
 
-        {/* Image gallery */}
+        {/* Mobile carousel */}
+        {images.length > 0 && (
+          <div className="relative lg:hidden mx-auto mt-6 max-w-2xl px-4 sm:px-6">
+            <div
+              className="overflow-hidden rounded-2xl bg-gray-900"
+              style={{ aspectRatio: '3/4', maxHeight: '68vh' }}
+              onTouchStart={e => { e.currentTarget._touchX = e.touches[0].clientX; }}
+              onTouchEnd={e => {
+                const diff = e.currentTarget._touchX - e.changedTouches[0].clientX;
+                if (Math.abs(diff) > 40) {
+                  setCurrentSlide(i =>
+                    diff > 0
+                      ? Math.min(i + 1, images.length - 1)
+                      : Math.max(i - 1, 0)
+                  );
+                }
+              }}
+            >
+              <div
+                className="flex h-full transition-transform duration-300 ease-in-out"
+                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+              >
+                {images.map((img, i) => (
+                  <div key={i} className="min-w-full h-full flex-shrink-0">
+                    <img
+                      src={img}
+                      alt={`${product["article-name"]} - view ${i + 1}`}
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Prev arrow */}
+            {currentSlide > 0 && (
+              <button
+                onClick={() => setCurrentSlide(i => i - 1)}
+                className="absolute left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/20 text-white flex items-center justify-center shadow-md hover:bg-black/65 transition-colors"
+                aria-label="Previous image"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+              </button>
+            )}
+
+            {/* Next arrow */}
+            {currentSlide < images.length - 1 && (
+              <button
+                onClick={() => setCurrentSlide(i => i + 1)}
+                className="absolute right-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/20 text-white flex items-center justify-center shadow-md hover:bg-black/65 transition-colors"
+                aria-label="Next image"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            )}
+
+            {/* Dot indicators */}
+            <div className="flex justify-center items-center gap-2 mt-3">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentSlide(i)}
+                  className={`h-2 rounded-full transition-all duration-300 ${i === currentSlide ? 'w-5 bg-white' : 'w-2 bg-white/35 hover:bg-white/60'}`}
+                  aria-label={`Go to image ${i + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Desktop image gallery */}
         <div className="mx-auto mt-6 max-w-2xl sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-3 lg:gap-x-8 lg:px-8">
           <div className="aspect-h-4 aspect-w-3 hidden overflow-hidden rounded-lg lg:block">
             <img
@@ -75,7 +150,7 @@ function Details(){
               />
             </div>
           </div>
-          <div className="aspect-h-5 aspect-w-4 lg:aspect-h-4 lg:aspect-w-3 sm:overflow-hidden sm:rounded-lg">
+          <div className="hidden lg:block aspect-h-4 aspect-w-3 overflow-hidden rounded-lg">
             <img
               src={images[3]}
               alt={product["article-name"]}
