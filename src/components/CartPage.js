@@ -1,14 +1,8 @@
 import { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CartContext } from "./CartContextComponent";
-
-function getProductImage(folderName) {
-    try {
-        return require(`../assets/products-images/${folderName}/image1.png`);
-    } catch {
-        return null;
-    }
-}
+import { QuantitySelector } from "./ui/QuantitySelector";
+import { getProductImage } from "../utils/getProductImage";
 
 function CartPage() {
     const { cartItems, cartTotal, removeFromCart, updateQuantity } = useContext(CartContext);
@@ -39,11 +33,11 @@ function CartPage() {
                                     <p className="CartPageItemMeta">{item.color} · Size {item.size}</p>
                                     <p className="CartPageItemUnitPrice">${parseFloat(item.price).toFixed(2)} each</p>
                                     <div className="CartPageItemActions">
-                                        <div className="CartQtyControls">
-                                            <button onClick={() => updateQuantity(item.id, item.quantity - 1)}>−</button>
-                                            <span>{item.quantity}</span>
-                                            <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
-                                        </div>
+                                        <QuantitySelector
+                                            value={item.quantity}
+                                            onChange={(qty) => updateQuantity(item.id, qty)}
+                                            className="CartQtyControls"
+                                        />
                                         <button className="CartPageRemoveBtn" onClick={() => removeFromCart(item.id)}>
                                             Remove
                                         </button>

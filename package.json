@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.2.0",
     "@fortawesome/free-brands-svg-icons": "^6.5.2",
     "@fortawesome/free-regular-svg-icons": "^6.5.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
@@ -14,9 +15,11 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.6.8",
+    "firebase": "^12.12.1",
     "framer-motion": "^11.2.4",
     "next-themes": "^0.3.0",
     "react": "^18.3.1",
+    "react-app-rewired": "^2.2.1",
     "react-aria": "^3.33.0",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.1",
@@ -26,7 +29,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "CI= react-scripts build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

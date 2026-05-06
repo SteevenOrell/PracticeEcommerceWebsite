@@ -1,14 +1,8 @@
 import { useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { CartContext } from "./CartContextComponent";
-
-function getProductImage(folderName) {
-    try {
-        return require(`../assets/products-images/${folderName}/image1.png`);
-    } catch {
-        return null;
-    }
-}
+import { QuantitySelector } from "./ui/QuantitySelector";
+import { getProductImage } from "../utils/getProductImage";
 
 function CartSidebar() {
     const { cartItems, cartTotal, isSidebarOpen, closeSidebar, removeFromCart, updateQuantity } = useContext(CartContext);
@@ -47,11 +41,11 @@ function CartSidebar() {
                                 <div className="CartSidebarItemInfo">
                                     <p className="CartSidebarItemName">{item["article-name"]}</p>
                                     <p className="CartSidebarItemPrice">${parseFloat(item.price).toFixed(2)}</p>
-                                    <div className="CartSidebarItemQty">
-                                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)}>−</button>
-                                        <span>{item.quantity}</span>
-                                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
-                                    </div>
+                                    <QuantitySelector
+                                        value={item.quantity}
+                                        onChange={(qty) => updateQuantity(item.id, qty)}
+                                        className="CartSidebarItemQty"
+                                    />
                                     <button className="CartSidebarRemoveBtn" onClick={() => removeFromCart(item.id)}>
                                         Remove
                                     </button>

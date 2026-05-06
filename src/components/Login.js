@@ -1,190 +1,243 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import {AcmeLogo} from "./AcmeLogo.js";
-import Axios from "axios";
-import { Outlet, Link, useNavigate} from "react-router-dom";
-import Dashboard from "./Dashboard.js";
-import { UserContext } from "./UserContextComponent.js";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    GoogleAuthProvider,
+    sendPasswordResetEmail,
+} from "firebase/auth";
+import { auth } from "../lib/firebase";
+import { Toast } from "./ui/Toast";
 
+function getFirebaseError(code) {
+    console.error("Firebase auth error code:", code);
+    switch (code) {
+        case "auth/user-not-found":
+        case "auth/wrong-password":
+        case "auth/invalid-credential":    return "Invalid email or password.";
+        case "auth/too-many-requests":     return "Too many attempts. Try again later.";
+        case "auth/invalid-email":         return "Invalid email address.";
+        case "auth/popup-closed-by-user":  return "Google sign-in was cancelled.";
+        case "auth/operation-not-allowed": return "Email/password sign-in is not enabled. Check Firebase console.";
+        case "auth/network-request-failed":return "Network error. Check your connection.";
+        case "auth/user-disabled":         return "This account has been disabled.";
+        default:                           return `Something went wrong (${code}). Please try again.`;
+    }
+}
 
-//Using cookies or context api will be better than handling user data this way
-
-
-function Login(){
-    const {userData,setUser,logout}= useContext(UserContext);
-    const [email,setEmail] = useState("")
-    const [password,setPassword] = useState("");
-    //const [user,setDataUser] = useState(null);
-    
-  
-    const [isSubmitClicked,setSubmit] = useState(false);
-    const [isNotifDisplayed,setNotif] = useState(false);
+function Login() {
     const navigate = useNavigate();
-    
-  
-  
-    useEffect(()=>{
-        if(isSubmitClicked){
-            Axios.get("https://6648f7ef4032b1331becf0f2.mockapi.io/users")
-            .then((res)=>{
-                if(res.data != null && res.data.length> 0){
-                    //console.log("Current email and password input "+ email +" "+ password);
-                    let count = 0;
-                    for(let i=0; i < res.data.length;i++){
-                        //console.log(res.data[i].email +" "+ res.data[i].password)
-                        if(email == res.data[i].email && password == res.data[i].password){
-                            
-                            console.log("User found" )
-                            
-                            //setDataUser(res.data[i])
-                            //console.log(res.data[i])
-                            setUser(res.data[i])
-                            navigate('/');
-                            //Send to Dashboard
-                        }
-                        else{
-                            count++;
-                            
-                        }
-                    }
-                    if(count == res.data.length){
-                        setNotif(true);
-                        console.log("User not found")
-                    }
-                }
-                else{
-                    setNotif(true);
-                    console.log("User list is empty");
-  
-                }
-            })
-        }
+    const [view, setView] = useState("login");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [forgotEmail, setForgotEmail] = useState("");
+    const [resetSent, setResetSent] = useState(false);
+    const [toast, setToast] = useState({ show: false, title: "", message: "" });
 
-        setSubmit(false)
-    },[isSubmitClicked])
-
-
-
-    const handleEmailChange = (e)=>{
-        //console.log(e.target.value);
-        setEmail(e.target.value)
+    function showToast(title, message) {
+        setToast({ show: true, title, message });
     }
-    const handlePasswordChange = (e)=>{
-        //console.log(e.target.value);
-        setPassword(e.target.value)
-    }
-    const handleSubmitClicked = (e)=>{
-        setSubmit(true);
+
+    async function handleSignIn(e) {
         e.preventDefault();
-        
-        
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            navigate("/");
+        } catch (err) {
+            showToast("Sign in failed", getFirebaseError(err.code));
+        }
     }
 
+    async function handleGoogleSignIn() {
+        try {
+            await signInWithPopup(auth, new GoogleAuthProvider());
+            navigate("/");
+        } catch (err) {
+            showToast("Google sign in failed", getFirebaseError(err.code));
+        }
+    }
 
-    return (<>
-    
-    {isNotifDisplayed ?  (<div aria-live="assertive" className="pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6">
-        <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
-            
-            <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-black shadow-lg ring-1 ring-red ring-opacity-5">
-            <div className="p-4">
-                <div className="flex items-start">
-                <div className="flex-shrink-0">
-                    <svg className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+    async function handleForgotPassword(e) {
+        e.preventDefault();
+        try {
+            await sendPasswordResetEmail(auth, forgotEmail);
+            setResetSent(true);
+        } catch (err) {
+            showToast("Error", getFirebaseError(err.code));
+        }
+    }
+
+    if (view === "forgot") {
+        return (
+            <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+                {toast.show && (
+                    <Toast
+                        title={toast.title}
+                        message={toast.message}
+                        onClose={() => setToast(t => ({ ...t, show: false }))}
+                    />
+                )}
+                <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+                    <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-white-900">
+                        Reset your password
+                    </h2>
                 </div>
-                <div className="ml-3 w-0 flex-1 pt-0.5">
-                    <p className="text-sm font-medium text-white-900">User not found</p>
-                    <p className="mt-1 text-sm text-white-500">Please enter correct credentials</p>
+                <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+                    {resetSent ? (
+                        <div className="text-center space-y-4">
+                            <p className="text-gray-400">
+                                Reset link sent to <span className="text-white">{forgotEmail}</span>. Check your inbox.
+                            </p>
+                            <button
+                                className="text-sm text-gray-400 hover:text-white underline"
+                                onClick={() => { setView("login"); setResetSent(false); setForgotEmail(""); }}
+                            >
+                                Back to sign in
+                            </button>
+                        </div>
+                    ) : (
+                        <form className="space-y-6" onSubmit={handleForgotPassword}>
+                            <div>
+                                <label htmlFor="forgot-email" className="block text-sm font-medium leading-6 text-white-900">
+                                    Email address
+                                </label>
+                                <div className="mt-2">
+                                    <input
+                                        id="forgot-email"
+                                        type="email"
+                                        value={forgotEmail}
+                                        onChange={e => setForgotEmail(e.target.value)}
+                                        required
+                                        className="block w-full rounded-md border-0 px-3 py-2.5 text-white-900 shadow-sm ring-1 ring-inset ring-white-300 placeholder:text-white-400 focus:ring-2 focus:ring-inset focus:ring-white-600 sm:text-sm sm:leading-6"
+                                    />
+                                </div>
+                            </div>
+                            <button
+                                type="submit"
+                                className="flex w-full justify-center rounded-md bg-gray-700 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gray-600"
+                            >
+                                Send reset email
+                            </button>
+                            <button
+                                type="button"
+                                className="w-full text-center text-sm text-gray-400 hover:text-white"
+                                onClick={() => setView("login")}
+                            >
+                                Back to sign in
+                            </button>
+                        </form>
+                    )}
                 </div>
-                <div className="ml-4 flex flex-shrink-0">
-                    <button type="button" className="inline-flex rounded-md bg-red text-white-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2" onClick={()=>setNotif(false)}>
-                    <span className="sr-only" >Close</span>
-                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-                    </svg>
+                <p className="mt-10 text-center text-sm text-gray-500">
+                    <Link to="/" className="font-semibold text-gray-400 hover:text-white">
+                        ← Back to home
+                    </Link>
+                </p>
+            </div>
+        );
+    }
+
+    return (
+        <>
+            {toast.show && (
+                <Toast
+                    title={toast.title}
+                    message={toast.message}
+                    onClose={() => setToast(t => ({ ...t, show: false }))}
+                />
+            )}
+            <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+                <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+                    <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-white-900">
+                        Sign in to your account
+                    </h2>
+                </div>
+
+                <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm space-y-6">
+                    <form className="space-y-6" onSubmit={handleSignIn}>
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium leading-6 text-white-900">
+                                Email address
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    id="email"
+                                    type="email"
+                                    autoComplete="email"
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    required
+                                    className="block w-full rounded-md border-0 px-3 py-2.5 text-white-900 shadow-sm ring-1 ring-inset ring-white-300 placeholder:text-white-400 focus:ring-2 focus:ring-inset focus:ring-white-600 sm:text-sm sm:leading-6"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <div className="flex items-center justify-between">
+                                <label htmlFor="password" className="block text-sm font-medium leading-6 text-white-900">
+                                    Password
+                                </label>
+                                <button
+                                    type="button"
+                                    className="text-sm font-semibold text-gray-400 hover:text-gray-300"
+                                    onClick={() => setView("forgot")}
+                                >
+                                    Forgot password?
+                                </button>
+                            </div>
+                            <div className="mt-2">
+                                <input
+                                    id="password"
+                                    type="password"
+                                    autoComplete="current-password"
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    required
+                                    className="block w-full rounded-md border-0 px-3 py-2.5 text-white-900 shadow-sm ring-1 ring-inset ring-white-300 placeholder:text-white-400 focus:ring-2 focus:ring-inset focus:ring-gray-500 sm:text-sm sm:leading-6"
+                                />
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="flex w-full justify-center rounded-md bg-gray-700 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+                        >
+                            Sign in
+                        </button>
+                    </form>
+
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-700" />
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="bg-black px-2 text-gray-400">Or continue with</span>
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={handleGoogleSignIn}
+                        className="flex w-full items-center justify-center gap-3 rounded-md border border-gray-700 bg-transparent px-3 py-2.5 text-sm font-semibold text-white hover:bg-gray-900 transition-colors"
+                    >
+                        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                        Continue with Google
                     </button>
+
+                    <p className="text-center text-sm text-gray-500">
+                        <Link to="/" className="font-semibold text-gray-400 hover:text-white">
+                            ← Back to home
+                        </Link>
+                    </p>
                 </div>
-                </div>
             </div>
-            </div>
-        </div>
-    </div>): "" 
-    }
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-    <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        {/* {<AcmeLogo />} */}
-      <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-white-900">
-        Sign in to your account
-      </h2>
-    </div>
-  
-    <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-      <form className="space-y-6" >
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium leading-6 text-white-900">
-            Email address
-          </label>
-          <div className="mt-2">
-          
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              onChange={e=>handleEmailChange(e)}
-              required
-              className="block w-full rounded-md border-0 px-3 py-2.5 text-white-900 shadow-sm ring-1 ring-inset ring-white-300 placeholder:text-white-400 focus:ring-2 focus:ring-inset focus:ring-white-600 sm:text-sm sm:leading-6"
-            />
-          </div>
-        </div>
-  
-        <div>
-          <div className="flex items-center justify-between">
-            <label htmlFor="password" className="block text-sm font-medium leading-6 text-whit-900">
-              Password
-            </label>
-            <div className="text-sm">
-              <a href="#" className="font-semibold text-gray-400 hover:text-gray-300">
-                Forgot password?
-              </a>
-            </div>
-          </div>
-          <div className="mt-2">
-          
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              onChange={e=>handlePasswordChange(e)}
-              required
-              className="block w-full rounded-md border-0 px-3 py-2.5 text-white-900 shadow-sm ring-1 ring-inset ring-white-300 placeholder:text-white-400 focus:ring-2 focus:ring-inset focus:ring-gray-500 sm:text-sm sm:leading-6"
-            />
-          </div>
-        </div>
-  
-        <div>
-          <Link to="/">
-          <button
-            type="submit"
-            className="flex w-full justify-center rounded-md bg-gray-700 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
-            onClick={(e)=>handleSubmitClicked(e)}
-            >
-            Sign in
-          </button>
-          </Link>  
-        </div>
-      </form>
-  
-  
-    </div>
-    <Outlet/>
-    
-  </div>
-  
-  </>
-  )
-  }
+        </>
+    );
+}
 
 export default Login;

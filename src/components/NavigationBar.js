@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useContext } from "react";
-import Axios from "axios";
-import { Outlet, Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
     Navbar, NavbarBrand, NavbarContent, Input, NavbarItem,
     Link as NextUILink, Dropdown, DropdownTrigger, DropdownMenu,
@@ -11,6 +10,8 @@ import { AcmeLogo } from "./AcmeLogo.js";
 import { UserContext } from "./UserContextComponent.js";
 import { SearchContext } from "./SearchDataComponent.js";
 import { CartContext } from "./CartContextComponent.js";
+import { getProducts } from "../api/products.js";
+import { getProductImage } from "../utils/getProductImage.js";
 
 function Navigation() {
     const { user, logout } = useContext(UserContext);
@@ -28,10 +29,9 @@ function Navigation() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        Axios.get("https://6648f7ef4032b1331becf0f2.mockapi.io/products")
-            .then((res) => {
-                if (res.data.length > 0) setProducts(res.data);
-            });
+        getProducts().then(res => {
+            if (res.data.length > 0) setProducts(res.data);
+        });
     }, []);
 
     useEffect(() => {
@@ -53,11 +53,6 @@ function Navigation() {
     function handleLogout() {
         logout();
         navigate("/login");
-    }
-
-    function handleDropdownClick(e) {
-        if (e.target.innerText === "Manage Users (Admin only)") navigate("/manage-users");
-        else if (e.target.innerText === "My Account") navigate("/edit-your-profile");
     }
 
     function handleOverlaySearch(e) {
@@ -92,14 +87,6 @@ function Navigation() {
         setSearchDataFound(true);
     }
 
-    function getProductImage(folderName) {
-        try {
-            return require(`../assets/products-images/${folderName}/image1.png`);
-        } catch {
-            return null;
-        }
-    }
-
     return (
         <>
             {isSearchOpen && <div id="SearchBackdrop" onClick={handleCancel} />}
@@ -109,7 +96,7 @@ function Navigation() {
                     <div id="SearchOverlayHeader">
                         <Link to="/" onClick={handleCancel} id="SearchOverlayLogo">
                             <AcmeLogo />
-                        </Link>                        
+                        </Link>
                         <Input
                             autoFocus
                             value={searchQuery}
@@ -126,7 +113,6 @@ function Navigation() {
                             type="search"
                         />
                         <button id="SearchCancelBtn" onClick={handleCancel}>Cancel</button>
-
                     </div>
 
                     <div id="SearchResults">
@@ -164,11 +150,9 @@ function Navigation() {
                 </NavbarContent>
                 <NavbarContent className="hidden sm:flex gap-3" justify="start">
                     {links.map((link) => (
-                      
                         <NavbarItem key={`key${link}`}>
                             <NextUILink color="foreground" href="/products">{link}</NextUILink>
                         </NavbarItem>
-                     
                     ))}
                 </NavbarContent>
                 {width < 639
@@ -184,14 +168,12 @@ function Navigation() {
                     </NavbarContent>
                 }
 
-
-
                 <NavbarContent as="div" className="items-center" justify="end">
-                    {user == null && width >639
-                        ? <Link to="/login" className="text-sm font-medium text-default-600 hover:text-default-900 whitespace-nowrap">Sign in</Link>
-                        : ""}
+                    {user === null && width > 639 && (
+                        <Link to="/login" className="text-sm font-medium text-default-600 hover:text-default-900 whitespace-nowrap">Sign in</Link>
+                    )}
 
-                    {width < 639 && user == null
+                    {width < 639 && user === null
                         ? <button id="NavSearchIconBtn" onClick={() => setIsSearchOpen(true)}>
                             <SearchIcon size={22} />
                           </button>
@@ -221,8 +203,8 @@ function Navigation() {
                         {cartCount > 0 && <span id="CartBadge">{cartCount}</span>}
                     </button>
 
-                    {user != null
-                        ? <Dropdown placement="bottom-end">
+                    {user !== null && (
+                        <Dropdown placement="bottom-end">
                             <DropdownTrigger>
                                 <Avatar
                                     isBordered
@@ -239,29 +221,23 @@ function Navigation() {
                                     <p className="font-semibold">Signed in as</p>
                                     <p className="font-semibold">{user["email"]}</p>
                                 </DropdownItem>
-                                <DropdownItem key="settings"
-                                    onPointerEnter={e => { if (width < 639) handleDropdownClick(e); }}
-                                    onClick={e => { if (width > 639) handleDropdownClick(e); }}
-                                >
-                                    <Link to="/edit-your-profile">My Account</Link>
+                                <DropdownItem key="settings" onPress={() => navigate("/edit-your-profile")}>
+                                    My Account
                                 </DropdownItem>
-                                {user["user-role"] === "admin"
-                                    ? <DropdownItem key="system"
-                                        onPointerEnter={e => { if (width < 639) handleDropdownClick(e); }}
-                                        onClick={e => { if (width > 639) handleDropdownClick(e); }}
-                                    >
-                                        <Link to="/manage-users">Manage Users {` (Admin only)`}</Link>
+                                {user["user-role"] === "admin" && (
+                                    <DropdownItem key="system" onPress={() => navigate("/manage-users")}>
+                                        Manage Users (Admin only)
                                     </DropdownItem>
-                                    : ""}
-                                <DropdownItem key="logout" color="danger" onClick={handleLogout}>
+                                )}
+                                <DropdownItem key="logout" color="danger" onPress={handleLogout}>
                                     Log Out
                                 </DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
-                        : ""}
+                    )}
 
                     <NavbarMenu className="z-30 px-6 pt-6 fixed flex max-w-full top-[var(--navbar-height)] inset-x-0 bottom-0 w-screen flex-col gap-2 overflow-y-auto backdrop-blur-xl backdrop-saturate-150 bg-background/70">
-                        {user == null
+                        {user === null
                             ? <NavbarMenuItem key="mobile-SignIn">
                                 <Link to="/login">
                                     <NextUILink className="w-full" color="foreground" href="/login" size="lg">
@@ -280,16 +256,13 @@ function Navigation() {
                         }
                         {links.map((item, index) => (
                             <NavbarMenuItem key={`${item}-${index}`}>
-                              
                                 <NextUILink className="w-full" color="foreground" href="/products" size="lg">
                                     {item}
                                 </NextUILink>
-                              
                             </NavbarMenuItem>
                         ))}
                     </NavbarMenu>
                 </NavbarContent>
-                <Outlet />
             </Navbar>
         </>
     );

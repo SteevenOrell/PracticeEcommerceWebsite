@@ -1,8 +1,9 @@
 import { useState, useEffect, useContext, useMemo, useRef } from "react";
-import { Outlet, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Card, CardHeader, CardBody, Pagination } from "@nextui-org/react";
-import Axios from "axios";
 import { SearchContext } from "./SearchDataComponent";
+import { getProducts } from "../api/products";
+import { getProductImage } from "../utils/getProductImage";
 
 const PAGE_SIZE = 9;
 
@@ -27,10 +28,9 @@ function Dashboard() {
     }, []);
 
     useEffect(() => {
-        Axios.get("https://6648f7ef4032b1331becf0f2.mockapi.io/products")
-            .then((res) => {
-                if (res.data.length > 0) setProducts(res.data);
-            });
+        getProducts().then(res => {
+            if (res.data.length > 0) setProducts(res.data);
+        });
     }, []);
 
     useEffect(() => {
@@ -159,7 +159,7 @@ function Dashboard() {
                     <div className="text-center">
                         <h1 className="mt-4 text-3xl font-bold tracking-tight text-white-900 sm:text-5xl">Keywords not found</h1>
                         <p className="mt-6 text-base leading-7 text-gray-400">Sorry, we couldn't find the product you're looking for.</p>
-                        <div className="mt-10 flex items-center justify-center gap-x-6" onClick={() => handleSearchReset()}>
+                        <div className="mt-10 flex items-center justify-center gap-x-6" onClick={handleSearchReset}>
                             <Link to="/"
                                 className="rounded-md bg-gray-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
                             >Search another keyword</Link>
@@ -172,36 +172,33 @@ function Dashboard() {
             )}
 
             <div id="productDiv" className="gap-5 grid grid-cols-2 sm:grid-cols-3">
-                {isSearchDataFound && displayedProducts.map((item) => {
-                    let path = require(`../assets/products-images/${item["image-folder-name"]}/image1.png`);
-                    return (
-                        <Card
-                            className="py-4"
-                            key={item.id}
-                            shadow="none"
-                            style={{ background: 'transparent', border: 'none' }}
-                            isPressable
-                            onPress={() => {}}
-                        >
-                            <Link to={`/details/${item.id}`}>
-                                <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-                                    <div className="ProductCardImg">
-                                        <img
-                                            alt="Card background"
-                                            src={path}
-                                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                                        />
-                                    </div>
-                                </CardHeader>
-                                <CardBody className="overflow-visible py-2">
-                                    <h4 className="font-bold text-large">{item["article-name"]}</h4>
-                                    <p className="text-tiny uppercase font-bold">{"$" + item["price"]}</p>
-                                    <small className="text-default-500">Color {item["color"]}</small>
-                                </CardBody>
-                            </Link>
-                        </Card>
-                    );
-                })}
+                {isSearchDataFound && displayedProducts.map((item) => (
+                    <Card
+                        className="py-4"
+                        key={item.id}
+                        shadow="none"
+                        style={{ background: 'transparent', border: 'none' }}
+                        isPressable
+                        onPress={() => {}}
+                    >
+                        <Link to={`/details/${item.id}`}>
+                            <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+                                <div className="ProductCardImg">
+                                    <img
+                                        alt={item["article-name"]}
+                                        src={getProductImage(item["image-folder-name"])}
+                                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                    />
+                                </div>
+                            </CardHeader>
+                            <CardBody className="overflow-visible py-2">
+                                <h4 className="font-bold text-large">{item["article-name"]}</h4>
+                                <p className="text-tiny uppercase font-bold">{"$" + item["price"]}</p>
+                                <small className="text-default-500">Color {item["color"]}</small>
+                            </CardBody>
+                        </Link>
+                    </Card>
+                ))}
             </div>
 
             {totalPages > 1 && (
@@ -216,7 +213,6 @@ function Dashboard() {
                     />
                 </div>
             )}
-            <Outlet />
         </>
     );
 }

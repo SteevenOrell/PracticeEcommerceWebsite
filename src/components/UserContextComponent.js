@@ -1,49 +1,51 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import {AcmeLogo} from "./AcmeLogo.js";
-import Axios from "axios";
-import { Outlet, Link, useNavigate} from "react-router-dom";
-import Dashboard from "./Dashboard.js";
+import { createContext, useEffect, useState } from "react";
+import { onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
+import { auth } from "../lib/firebase";
 
+const UserContext = createContext({ user: null, setUser: () => {}, logout: () => {} });
 
-//Using cookies or context api will be better than handling user data this way
-const UserContext = createContext({userData:null, setUser: ()=>{}, logout: () => {}});
-
-function UserContextComponent({children}){
-
-    const [user,setDataUser] = useState(null);
+function UserContextComponent({ children }) {
+    const [user, setDataUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        //console.log("Checking for initial user data.");
-        const storedUser = localStorage.getItem('userData'); //unsecure way to store data don't put important data
-        if (storedUser) {
-        setDataUser(JSON.parse(storedUser));
-        //console.log("UserProvider: Found stored user:", JSON.stringify(storedUser));
-        }
-  }, []);
+        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+            if (firebaseUser) {
+                const isAdmin = firebaseUser.email === process.env.REACT_APP_ADMIN_EMAIL;
+                setDataUser({
+                    id: firebaseUser.uid,
+                    name: firebaseUser.displayName || firebaseUser.email?.split("@")[0],
+                    email: firebaseUser.email,
+                    avatar: firebaseUser.photoURL,
+                    "user-role": isAdmin ? "admin" : "user",
+                });
+            } else {
+                setDataUser(null);
+            }
+            setLoading(false);
+        });
+        return unsubscribe;
+    }, []);
 
     const setUser = (userData) => {
-        if (userData) {
-            localStorage.setItem("userData", JSON.stringify(userData));
-            setDataUser(userData);
-        } else {
-            localStorage.removeItem('userData');
-            setDataUser(null);
+        setDataUser(userData);
+        if (auth.currentUser && userData) {
+            updateProfile(auth.currentUser, {
+                displayName: userData.name,
+                photoURL: userData.avatar,
+            }).catch(() => {});
         }
-    }
+    };
 
-    const logout = () =>{
-      console.log("User logout");
-      setUser(null);
-      
-    }
-    
+    const logout = () => signOut(auth);
+
+    if (loading) return null;
+
     return (
-
-        <UserContext.Provider value={{user,setUser,logout}}>
+        <UserContext.Provider value={{ user, setUser, logout }}>
             {children}
         </UserContext.Provider>
-
-    )
+    );
 }
 
-export {UserContextComponent, UserContext};
+export { UserContextComponent, UserContext };

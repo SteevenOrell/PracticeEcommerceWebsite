@@ -1,5 +1,5 @@
-import {React, useState,useEffect} from "react";
-import { Outlet, Link } from "react-router-dom";
+import {React} from "react";
+import { Link } from "react-router-dom";
 import {AcmeLogo} from "./AcmeLogo.js";
 
 import {FontAwesomeIcon } from "@fortawesome/react-fontawesome"
@@ -52,7 +52,6 @@ function Footer(){
                     <span className="text-lg text-gray-400 text-center block">©<a href="www.linkedin.com/in/orell-wemin-8519a5179">Steeven Wemin</a> {new Date().getFullYear}, All rights reserved.</span>
             </div>
         </div>
-        <Outlet/>
     </footer> )
 
 }
