@@ -31,8 +31,8 @@ function MainPage() {
                 </video>
                 <div className="Hero-content">
                     <h3>Find new ways to create</h3>
-                    <p>Discover the Nike X Louis vuitton collab</p>
-                    <Link to="/details/17">
+                    <p>Discover the new collab</p>
+                    <Link to="/products">
                         <button>Shop Now</button>
                     </Link>
                 </div>
