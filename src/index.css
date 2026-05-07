@@ -853,6 +853,12 @@ h1 {
     transform: translate(-50%, -50%);
     top: 50%;
   }
+  #HeroDiv2 .Hero-content {
+    color: white;
+  }
+  #HeroDiv2 .Hero-content button {
+    color: white;
+  }
 }
 
 @media (max-width: 625px) {
