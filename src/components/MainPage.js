@@ -8,8 +8,8 @@ import heroImg2 from '../assets/ChatGPT Image May 7, 2026, 03_20_05 PM.png';
 import heroImg2Mobile from '../assets/8bb2c7a3500bad49a6c6ba61bf8f4efa.jpg';
 import img1 from '../assets/cd68aa257b0310cc65237e3e3b5b1a27.jpg';
 import img2 from '../assets/fe8686efe5c95ad56fbb4c17dfa14546.jpg';
-import img3 from '../assets/ac734b84b63eda6bf01aee80ba3786d1.jpg';
-import img4 from '../assets/1e88d072425e43957dc6b15380a265a5.jpg';
+import img3 from '../assets/118b4e899715c5cdcaed9decd6cd4738.jpg';
+import img4 from '../assets/ac734b84b63eda6bf01aee80ba3786d1.jpg';
 
 function MainPage() {
     const [products, setProducts] = useState([]);
