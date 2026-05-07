@@ -4,7 +4,7 @@ import Axios from 'axios';
 import { getProductImage } from '../utils/getProductImage';
 import mainVid1 from '../assets/HeroSectionVid.mp4';
 import mainVid2 from '../assets/fashion-teamwork-and-hands-of-women-with-pattern-2025-12-17-14-35-47-utc.mov';
-import mainVid1Mobile from '../assets/fashion-teamwork-and-hands-of-women-with-pattern-2025-12-17-14-35-47-utc.mov';
+import mainVid1Mobile from '../assets/athlete-black-man-and-tying-shoes-on-road-for-get-2025-12-18-02-04-06-utc_compressed.mov';
 import mainVid2Mobile from '../assets/bridal-fashion-designers-choosing-decorative-eleme-2026-01-22-16-12-16-utc.mp4';
 import img1 from '../assets/hes-the-man-of-the-match-shot-of-a-rugby-player-s-2026-03-25-02-15-18-utc.jpg';
 import img2 from '../assets/runners-jumping-over-hurdle-on-track-2026-01-09-11-45-48-utc.jpg';
