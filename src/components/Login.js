@@ -50,7 +50,9 @@ function Login() {
 
     async function handleGoogleSignIn() {
         try {
-            await signInWithPopup(auth, new GoogleAuthProvider());
+            const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: "select_account" });
+            await signInWithPopup(auth, provider);
             navigate("/");
         } catch (err) {
             showToast("Google sign in failed", getFirebaseError(err.code));
