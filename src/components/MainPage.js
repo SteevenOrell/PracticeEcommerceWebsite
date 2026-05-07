@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Axios from 'axios';
 import { getProductImage } from '../utils/getProductImage';
-import mainVid1 from '../assets/HeroSectionVid.mp4';
-import mainVid2 from '../assets/fashion-teamwork-and-hands-of-women-with-pattern-2025-12-17-14-35-47-utc.mov';
+import mainVid1 from '../assets/athlete-black-man-and-tying-shoes-in-city-for-get-2025-12-18-01-49-15-utc2_compressed.mp4';
 import mainVid1Mobile from '../assets/athlete-black-man-and-tying-shoes-on-road-for-get-2025-12-18-02-04-06-utc_compressed.mov';
-import mainVid2Mobile from '../assets/bridal-fashion-designers-choosing-decorative-eleme-2026-01-22-16-12-16-utc.mp4';
-import img1 from '../assets/hes-the-man-of-the-match-shot-of-a-rugby-player-s-2026-03-25-02-15-18-utc.jpg';
-import img2 from '../assets/runners-jumping-over-hurdle-on-track-2026-01-09-11-45-48-utc.jpg';
-import img3 from '../assets/standing-firm-on-the-ground-2026-01-09-11-00-59-utc.jpg';
-import img4 from '../assets/young-men-running-on-race-track-2026-03-08-23-49-32-utc.jpg';
+import heroImg2 from '../assets/ChatGPT Image May 7, 2026, 03_20_05 PM.png';
+import heroImg2Mobile from '../assets/8bb2c7a3500bad49a6c6ba61bf8f4efa.jpg';
+import img1 from '../assets/cd68aa257b0310cc65237e3e3b5b1a27.jpg';
+import img2 from '../assets/fe8686efe5c95ad56fbb4c17dfa14546.jpg';
+import img3 from '../assets/ac734b84b63eda6bf01aee80ba3786d1.jpg';
+import img4 from '../assets/1e88d072425e43957dc6b15380a265a5.jpg';
 
 function MainPage() {
     const [products, setProducts] = useState([]);
@@ -39,7 +39,7 @@ function MainPage() {
             </div>
 
             <div id="HomeImageGrid">
-                <h3 id="HomeImageGridTitle">Our Passion</h3>
+                <h3 id="HomeImageGridTitle">Your Passion is your path</h3>
                 <Link to="/products" className="HomeImageGridItem">
                     <img src={img1} alt="Jordan 1 Retro High Off-White Blue" />
                 </Link>
@@ -55,10 +55,10 @@ function MainPage() {
             </div>
 
             <div id="HeroDiv2">
-                <video autoPlay loop muted playsInline>
-                    <source src={mainVid2Mobile} media="(max-width: 768px)" type="video/mp4" />
-                    <source src={mainVid2} type="video/mp4" />
-                </video>
+                <picture>
+                    <source srcSet={heroImg2Mobile} media="(max-width: 768px)" />
+                    <img src={heroImg2} alt="Step into the future" />
+                </picture>
                 <div className="Hero-content">
                     <h3>Step into the future</h3>
                     <p>Explore the latest drops and limited editions</p>

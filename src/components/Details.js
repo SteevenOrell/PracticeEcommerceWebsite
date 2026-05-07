@@ -46,8 +46,8 @@ function Details() {
                 {images.length > 0 && (
                     <div className="relative lg:hidden mx-auto mt-6 max-w-2xl px-4 sm:px-6">
                         <div
-                            className="overflow-hidden rounded-2xl bg-gray-900"
-                            style={{ aspectRatio: '3/4', maxHeight: '68vh' }}
+                            className="overflow-hidden rounded-2xl bg-gray-900 w-full"
+                            style={{ aspectRatio: '4/5' }}
                             onTouchStart={e => { e.currentTarget._touchX = e.touches[0].clientX; }}
                             onTouchEnd={e => {
                                 const diff = e.currentTarget._touchX - e.changedTouches[0].clientX;
@@ -62,14 +62,21 @@ function Details() {
                         >
                             <div
                                 className="flex h-full transition-transform duration-300 ease-in-out"
-                                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                                style={{
+                                    width: `${images.length * 100}%`,
+                                    transform: `translateX(-${currentSlide * (100 / images.length)}%)`
+                                }}
                             >
                                 {images.map((img, i) => (
-                                    <div key={i} className="min-w-full h-full flex-shrink-0">
+                                    <div
+                                        key={i}
+                                        className="h-full flex-shrink-0"
+                                        style={{ width: `${100 / images.length}%` }}
+                                    >
                                         <img
                                             src={img}
                                             alt={`${product["article-name"]} - view ${i + 1}`}
-                                            className="h-full w-full object-contain"
+                                            className="h-full w-full object-cover"
                                         />
                                     </div>
                                 ))}
