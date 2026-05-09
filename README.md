@@ -2,7 +2,7 @@
 
 **Live:** https://ecom-web-practice.vercel.app/
 
-A full-stack CRUD ecommerce application built with React, React Router, and a REST API.
+This is a full-stack CRUD ecommerce application built with React, React Router, and a REST API.
 
 ---
 
