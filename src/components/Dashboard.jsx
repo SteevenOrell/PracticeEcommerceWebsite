@@ -76,9 +76,19 @@ function Dashboard() {
         setFilterColor("all"); setFilterSize("all"); setSortBy("default"); setPurpose("all"); setSearch("");
     }
 
+    // Scroll to the top once the new page has rendered. Doing it in the click handler raced
+    // the re-render and the pagination button's focus, which cancelled the smooth scroll.
+    const pageChanged = useRef(false);
+    useEffect(() => {
+        if (!pageChanged.current) return;
+        pageChanged.current = false;
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }, [currentPage]);
+
     function handlePageChange(page) {
+        pageChanged.current = true;
         setCurrentPage(page);
-        window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     return (

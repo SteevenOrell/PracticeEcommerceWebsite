@@ -109,8 +109,15 @@ function Navigation() {
     useEffect(() => {
         if (!menuOpen) return undefined;
         const onKey = (e) => { if (e.key === "Escape") setMenuOpen(false); };
+        const onResize = () => { if (window.innerWidth >= 768) setMenuOpen(false); };
         document.addEventListener("keydown", onKey);
-        return () => document.removeEventListener("keydown", onKey);
+        window.addEventListener("resize", onResize);
+        document.body.style.overflow = "hidden"; // keep the page behind the menu from scrolling
+        return () => {
+            document.removeEventListener("keydown", onKey);
+            window.removeEventListener("resize", onResize);
+            document.body.style.overflow = "";
+        };
     }, [menuOpen]);
 
     const closeSearch = useRef(() => setSearchOpen(false)).current;
@@ -179,20 +186,36 @@ function Navigation() {
                     </div>
                 </nav>
 
-                {menuOpen && (
-                    <div id="mobile-menu" className="fixed inset-x-0 bottom-0 top-[var(--nav-h)] z-40 overflow-y-auto bg-[var(--ink)] px-[var(--gutter)] py-8 md:hidden">
-                        <ul className="space-y-2">
-                            {LINKS.map(l => (
-                                <li key={l.label}><Link to={l.to} className="display block py-2 text-5xl">{l.label}</Link></li>
-                            ))}
-                        </ul>
-                        <div className="mt-10 grid gap-3 border-t hairline pt-8">
-                            {!user && <Link to="/login" className="btn btn-primary">Sign in</Link>}
-                            <button type="button" className="btn btn-ghost" onClick={() => { setMenuOpen(false); setSearchOpen(true); }}>Search</button>
-                        </div>
-                    </div>
-                )}
             </header>
+
+            {/* Rendered outside <header>: the header's backdrop-filter makes it the containing
+                block for fixed children, which clipped the menu to the 64px bar on phones. */}
+            {menuOpen && (
+                <div id="mobile-menu" className="mobile-menu md:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+                    <ul className="mobile-menu-links">
+                        {LINKS.map(l => (
+                            <li key={l.label}>
+                                <Link to={l.to} onClick={() => setMenuOpen(false)} aria-current={isActive(l.to) ? "page" : undefined}>
+                                    <span>{l.label}</span><span aria-hidden="true">→</span>
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                    <div className="mt-8 grid gap-3">
+                        {user ? (
+                            <>
+                                <p className="muted truncate text-sm">Signed in as {user.email}</p>
+                                <Link to="/edit-your-profile" className="btn btn-ghost" onClick={() => setMenuOpen(false)}>My account</Link>
+                                {user["user-role"] === "admin" && <Link to="/manage-users" className="btn btn-ghost" onClick={() => setMenuOpen(false)}>Manage users</Link>}
+                                <button type="button" className="btn btn-ghost" onClick={() => { setMenuOpen(false); handleLogout(); }}>Log out</button>
+                            </>
+                        ) : (
+                            <Link to="/login" className="btn btn-primary" onClick={() => setMenuOpen(false)}>Sign in</Link>
+                        )}
+                        <button type="button" className="btn btn-ghost" onClick={() => { setMenuOpen(false); setSearchOpen(true); }}>Search</button>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
