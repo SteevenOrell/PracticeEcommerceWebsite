@@ -69,11 +69,5 @@ This is a full-stack CRUD ecommerce application built with React, React Router, 
 
 ---
 
-## Test Account
-
-| Field | Value |
-|---|---|
-| Email | test@gmail.com |
-| Password | test123 |
 
 > Contact me on LinkedIn to test admin features.
