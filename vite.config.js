@@ -3,7 +3,9 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  server: { port: 3000, strictPort: false },
+  // allowedHosts lets the dev server answer through a VS Code / Dev Tunnels URL for
+  // testing on a phone (dev server only; production builds are unaffected).
+  server: { port: 3000, strictPort: false, allowedHosts: [".devtunnels.ms"] },
   preview: { port: 4173 },
   build: {
     outDir: "dist",
