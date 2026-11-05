@@ -85,7 +85,7 @@ function Details() {
         setStatus("loading");
         getProduct(id)
             .then(res => { if (!alive) return; if (res.data) { setProduct(res.data); setStatus("ready"); } else setStatus("notfound"); })
-            .catch(err => { if (alive) setStatus(err?.response?.status === 404 ? "notfound" : "error"); });
+            .catch(() => { if (alive) setStatus("error"); });
         return () => { alive = false; };
     }, [id]);
 

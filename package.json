@@ -14,7 +14,12 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "media": "node scripts/capture-media.mjs"
+    "media": "node scripts/capture-media.mjs",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-ecommerce \"vitest run --config vitest.rules.config.js\"",
+    "emulators": "firebase emulators:start --project demo-ecommerce",
+    "firebase:seed": "node scripts/firebase/seed.mjs",
+    "firebase:set-admin": "node scripts/firebase/set-admin.mjs",
+    "firebase:deploy-rules": "firebase deploy --only firestore:rules"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
@@ -22,7 +27,6 @@
     "@headlessui/react": "^2.0.3",
     "@heroicons/react": "^2.1.3",
     "@nextui-org/react": "^2.3.6",
-    "axios": "^1.21.0",
     "firebase": "^12.19.0",
     "framer-motion": "^11.2.4",
     "next-themes": "^0.3.0",
@@ -32,6 +36,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
@@ -40,6 +45,8 @@
     "eslint": "^9.39.5",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "firebase-admin": "^13.10.0",
+    "firebase-tools": "^14.27.0",
     "globals": "^17.14.0",
     "jsdom": "^30.1.3",
     "playwright": "^1.64.1",

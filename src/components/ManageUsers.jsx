@@ -47,9 +47,21 @@ function ManageUsers() {
     }, []);
 
     function refreshData() {
-        getUsers().then(res => {
-            if (res.data !== null) setUsers(res.data);
-        });
+        getUsers()
+            .then(res => { if (res.data !== null) setUsers(res.data); })
+            .catch(() => {
+                setDisplayedMessage("Unable to load users — admin access required");
+                setNotif(true);
+            });
+    }
+
+    async function guarded(fn) {
+        try {
+            await fn();
+        } catch {
+            setDisplayedMessage("Operation failed — admin access required");
+            setNotif(true);
+        }
     }
 
     async function handleProfileUpdate(e) {
@@ -70,24 +82,26 @@ function ManageUsers() {
             return;
         }
 
-        const res = await getUsers();
-        const duplicate = res.data.find(u =>
-            u.email?.toLowerCase() === userToAdd.email.trim().toLowerCase()
-        );
-        if (duplicate) {
-            setDisplayedMessage("Cannot be added — user already exists");
-            setNotif(true);
-            return;
-        }
+        await guarded(async () => {
+            const res = await getUsers();
+            const duplicate = res.data.find(u =>
+                u.email?.toLowerCase() === userToAdd.email.trim().toLowerCase()
+            );
+            if (duplicate) {
+                setDisplayedMessage("Cannot be added — user already exists");
+                setNotif(true);
+                return;
+            }
 
-        const created = await createUser(userToAdd);
-        if ([200, 201].includes(created.status)) {
-            setDisplayedMessage("Added Successfully");
-            addFormRef.current?.reset();
-            setUserToAdd({ ...INITIAL_USER, createdAt: new Date() });
-            refreshData();
-        }
-        setNotif(true);
+            const created = await createUser(userToAdd);
+            if ([200, 201].includes(created.status)) {
+                setDisplayedMessage("Added Successfully");
+                addFormRef.current?.reset();
+                setUserToAdd({ ...INITIAL_USER, createdAt: new Date() });
+                refreshData();
+            }
+            setNotif(true);
+        });
     }
 
     function handleDataChange(e) {
@@ -96,14 +110,12 @@ function ManageUsers() {
 
     async function handleDelete(id) {
         if (!id) return;
-        const res = await deleteUser(id);
-        if (res.status === 200) {
+        await guarded(async () => {
+            await deleteUser(id);
             setDisplayedMessage("Successfully Deleted");
-        } else {
-            setDisplayedMessage("Operation Failed — unable to delete");
-        }
-        setNotif(true);
-        refreshData();
+            setNotif(true);
+            refreshData();
+        });
     }
 
     return (
@@ -111,7 +123,7 @@ function ManageUsers() {
             <main id="main" className="admin-shell flex w-full flex-col">
                 <p className="eyebrow">Admin</p>
                 <h1 className="display-lg mb-8 mt-2">Manage users</h1>
-                <p className="notice mb-8" role="note">Admin screens are UI-gated only. The users API behind them is public, so treat every record here as public demo data. See SECURITY.md.</p>
+                <p className="notice mb-8" role="note">These are fake demo records stored in Firestore. Only accounts with admin access can read or change them; the database rules enforce this, not just this screen.</p>
                 <Tabs id="ManagerUserTab" aria-label="Options">
                     <Tab key="ViewUsers" title="View Users">
                         <div id="DivTableUsers">

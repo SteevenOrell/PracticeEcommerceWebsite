@@ -5,25 +5,18 @@ import { auth } from "../lib/firebase";
 const UserContext = createContext({ user: null, setUser: () => {}, logout: () => {} });
 
 /**
- * Resolve the UI role for a signed-in user.
+ * Resolve the UI role for a signed-in user from the `admin: true` Firebase custom claim
+ * (granted with `npm run firebase:set-admin`).
  *
- * SECURITY NOTE: this only decides what the UI shows. Anything enforced in the browser
- * can be bypassed, so admin data/operations MUST be authorised by a backend that verifies
- * the Firebase ID token (see SECURITY.md). Preferred source is a Firebase custom claim
- * (`admin: true` or `role: "admin"`) set server-side with the Admin SDK. The admin-email
- * fallback is kept only for backwards compatibility and requires a verified email.
+ * SECURITY NOTE: this only decides what the UI shows. The real boundary is
+ * firestore.rules, which checks the same claim on every read and write.
  */
 async function resolveRole(firebaseUser) {
     try {
         const { claims } = await firebaseUser.getIdTokenResult();
-        if (claims.admin === true || claims.role === "admin") return "admin";
+        if (claims.admin === true) return "admin";
     } catch {
-        // fall through to the legacy check
-    }
-    const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
-    if (adminEmail && firebaseUser.emailVerified &&
-        firebaseUser.email?.toLowerCase() === adminEmail.toLowerCase()) {
-        return "admin";
+        // treat as a standard user
     }
     return "user";
 }

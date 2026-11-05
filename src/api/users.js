@@ -1,7 +1,10 @@
-import api from "./client";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
-// SECURITY: the mock users API is public and unauthenticated. Passwords are owned by
-// Firebase Auth and must never be written here; roles must only be assigned server-side.
+// Demo user records live in the Firestore `users` collection. Security rules
+// (firestore.rules) only let accounts with the `admin: true` custom claim read or write
+// them, so these calls fail with `permission-denied` for everyone else, whatever the UI does.
+// Passwords are owned by Firebase Auth and are never stored here.
 const WRITABLE_FIELDS = ["name", "email", "avatar", "createdAt"];
 const ROLE_VALUES = ["user", "admin"];
 
@@ -14,18 +17,44 @@ export function toUserPayload(data, { allowRole = false } = {}) {
     return out;
 }
 
-/** Drop sensitive fields from API responses before they reach component state. */
+/** Drop sensitive fields before records reach component state. */
 export function toPublicUser(u) {
     if (!u) return u;
     const { password, ...rest } = u; // eslint-disable-line no-unused-vars
     return rest;
 }
 
-const safeId = (id) => encodeURIComponent(String(id));
+function requireDb() {
+    if (!db) throw new Error("Firebase is not configured.");
+    return db;
+}
 
-export const getUsers = () => api.get("/users").then(res => ({ ...res, data: (res.data || []).map(toPublicUser) }));
-export const getUser = (id) => api.get(`/users/${safeId(id)}`).then(res => ({ ...res, data: toPublicUser(res.data) }));
-// Admin-only operations. The client-side admin check is UX only — see SECURITY.md.
-export const createUser = (data) => api.post("/users", toUserPayload(data, { allowRole: true }));
-export const updateUser = (id, data) => api.put(`/users/${safeId(id)}`, toUserPayload(data, { allowRole: true }));
-export const deleteUser = (id) => api.delete(`/users/${safeId(id)}`);
+const fromDoc = (snap) => toPublicUser({ ...snap.data(), id: snap.id });
+const usersCol = () => collection(requireDb(), "users");
+
+export async function getUsers() {
+    const snap = await getDocs(usersCol());
+    return { status: 200, data: snap.docs.map(fromDoc) };
+}
+
+export async function getUser(id) {
+    const snap = await getDoc(doc(usersCol(), String(id)));
+    return { status: snap.exists() ? 200 : 404, data: snap.exists() ? fromDoc(snap) : null };
+}
+
+export async function createUser(data) {
+    const payload = { ...toUserPayload(data, { allowRole: true }), createdAt: new Date().toISOString() };
+    const ref = await addDoc(usersCol(), payload);
+    return { status: 201, data: { ...payload, id: ref.id } };
+}
+
+export async function updateUser(id, data) {
+    const payload = toUserPayload(data, { allowRole: true });
+    await setDoc(doc(usersCol(), String(id)), payload, { merge: true });
+    return { status: 200, data: { ...payload, id: String(id) } };
+}
+
+export async function deleteUser(id) {
+    await deleteDoc(doc(usersCol(), String(id)));
+    return { status: 200, data: { id: String(id) } };
+}

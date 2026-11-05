@@ -2,7 +2,7 @@
 
 **Live:** https://ecom-web-practice.vercel.app/
 
-This is a full-stack CRUD ecommerce application built with React, React Router, and a REST API.
+This is a full-stack CRUD ecommerce application built with React, React Router, Firebase Auth and Cloud Firestore.
 
 ---
 
@@ -60,7 +60,7 @@ This is a full-stack CRUD ecommerce application built with React, React Router, 
 - **React 18** — UI and component logic
 - **React Router v6** — client-side routing and protected routes
 - **Context API** — cart, user, and search state
-- **Axios** — REST API communication
+- **Firebase Auth + Cloud Firestore** — sign-in, product catalog and admin-only user records, protected by [security rules](firestore.rules)
 - **Tailwind CSS** — utility-first styling
 - **NextUI / Headless UI** — accessible UI primitives
 - **Framer Motion** — animations
@@ -77,18 +77,33 @@ Requires Node.js 20.19+.
 
 ```bash
 npm ci
-cp .env.example .env.local   # fill in your Firebase web config (optional: the store works without it, sign-in is disabled)
+cp .env.example .env.local   # fill in your Firebase web config (optional: without it the store shows the bundled catalog and sign-in is disabled)
 npm run dev                  # http://localhost:3000
 npm run build && npm run preview
 npm test                     # unit tests
+npm run test:rules           # Firestore security-rules tests (starts the emulator; needs Java 11+)
 npm run lint
 npm run media                # optional: screenshots + walkthrough video (needs a running dev/preview server)
 ```
 
 Environment variables use the `VITE_` prefix (`VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`,
 `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`,
-`VITE_FIREBASE_APP_ID`, `VITE_ADMIN_EMAIL`, `VITE_API_BASE_URL`). Every `VITE_*` value is public in the
-browser bundle, so never put secrets in them. See [SECURITY.md](SECURITY.md) for the security model and the open backend items.
+`VITE_FIREBASE_APP_ID`, optional `VITE_USE_FIREBASE_EMULATOR`). Every `VITE_*` value is public in the
+browser bundle, so never put secrets in them. See [SECURITY.md](SECURITY.md) for the security model.
+
+> **Windows tip:** if the Firestore emulator exits with `Unable to establish loopback connection`, set
+> `JAVA_TOOL_OPTIONS=-Djdk.net.unixdomain.tmpdir=C:\Users\<you>\.jdkuds` (any short folder that exists) and retry.
+
+### Firebase setup (one-time)
+
+1. In the Firebase console, create a **Cloud Firestore** database (production mode). Under **Authentication**, enable the **Google** provider.
+2. Deploy the security rules: `npx firebase login`, then `npx firebase use <project-id>`, then `npm run firebase:deploy-rules`.
+3. Create a service-account key (**Project settings > Service accounts > Generate new private key**). Save it **outside this repo** and point to it:
+   `GOOGLE_APPLICATION_CREDENTIALS=C:\path\outside\repo\key.json`.
+4. Copy the demo data in: `npm run firebase:seed`. This copies products from `src/data/products.json` and users from the old MockAPI project, never including passwords. Add `-- --dry-run` to preview it first.
+5. Make yourself admin: sign in once on the site, then run `npm run firebase:set-admin -- you@example.com`, then sign out and back in.
+   Grant or revoke testers the same way (`--revoke`; `--list` shows current admins).
+6. Delete the old MockAPI project. The app no longer uses it, and it stays publicly writable for as long as it exists.
 
 ---
 
@@ -104,5 +119,6 @@ There is no shared test account. Two levels of access are available:
 
 **Please note:**
 - All products and users are fake demo data. The checkout is a demo: **never enter a real card number**.
-- Your Google name, email and photo are used only to show your account in the app's menu. They aren't written to the demo API.
+- Your Google name, email and photo are used only to show your account in the app's menu. They aren't written to the database.
+- Access is enforced by Firestore security rules on the server, not just hidden in the UI.
 - The demo data may be reset from time to time.

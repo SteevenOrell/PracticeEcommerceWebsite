@@ -1,0 +1,66 @@
+rules_version = '2';
+
+// Security model
+// - products: anyone may read; only admins may write (shape-validated).
+// - users:    demo records for the admin screens; only admins may read or write.
+// - anything else: denied.
+// "Admin" means the signed-in account carries the `admin: true` custom claim, which
+// can only be set server-side (scripts/firebase/set-admin.mjs, Admin SDK).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    function isShortString(v, max) {
+      return v is string && v.size() > 0 && v.size() <= max;
+    }
+
+    function optionalString(data, key, max) {
+      return !(key in data) || (data[key] is string && data[key].size() <= max);
+    }
+
+    function validProduct(d) {
+      return d.keys().hasOnly(['article-name', 'category', 'color', 'created-at', 'description',
+                               'gender', 'id', 'image-folder-name', 'price', 'purpose', 'quantity', 'size'])
+        && isShortString(d['article-name'], 120)
+        && d.price is number && d.price >= 0 && d.price < 100000
+        && (!('quantity' in d) || (d.quantity is int && d.quantity >= 0))
+        && (!('size' in d) || d.size is number)
+        && (!('image-folder-name' in d) || d['image-folder-name'].matches('^[A-Za-z0-9_-]{1,64}$'))
+        && optionalString(d, 'description', 2000)
+        && optionalString(d, 'category', 60)
+        && optionalString(d, 'color', 60)
+        && optionalString(d, 'gender', 20)
+        && optionalString(d, 'purpose', 60)
+        && optionalString(d, 'created-at', 40)
+        && optionalString(d, 'id', 64);
+    }
+
+    function validUser(d) {
+      return d.keys().hasOnly(['name', 'email', 'avatar', 'createdAt', 'user-role'])
+        && isShortString(d.name, 120)
+        && isShortString(d.email, 254)
+        && d.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && (!('avatar' in d) || d.avatar == '' || (d.avatar is string && d.avatar.size() <= 2048 && d.avatar.matches('^https://.*')))
+        && (!('user-role' in d) || d['user-role'] in ['user', 'admin'])
+        && optionalString(d, 'createdAt', 40);
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && validProduct(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read, delete: if isAdmin();
+      allow create, update: if isAdmin() && validUser(request.resource.data);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

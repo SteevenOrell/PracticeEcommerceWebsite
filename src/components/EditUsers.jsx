@@ -35,20 +35,24 @@ function EditUsers() {
             }
         }
 
-        const res = await getUsers();
-        const duplicate = res.data.find(u =>
-            u.email?.toLowerCase() === otherUser.email?.trim().toLowerCase() &&
-            u.id !== otherUser.id
-        );
-        if (duplicate) {
-            setDisplayedMessage("Unsuccessful — another user already uses this email");
-            setNotif(true);
-            return;
-        }
+        try {
+            const res = await getUsers();
+            const duplicate = res.data.find(u =>
+                u.email?.toLowerCase() === otherUser.email?.trim().toLowerCase() &&
+                u.id !== otherUser.id
+            );
+            if (duplicate) {
+                setDisplayedMessage("Unsuccessful — another user already uses this email");
+                setNotif(true);
+                return;
+            }
 
-        const updated = await updateUser(otherUser.id, otherUser);
-        if (updated.status === 200) {
-            setDisplayedMessage("Successful");
+            const updated = await updateUser(otherUser.id, otherUser);
+            if (updated.status === 200) {
+                setDisplayedMessage("Successful");
+            }
+        } catch {
+            setDisplayedMessage("Unsuccessful — admin access required");
         }
         setNotif(true);
     }
