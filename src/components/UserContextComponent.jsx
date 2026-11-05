@@ -20,7 +20,7 @@ async function resolveRole(firebaseUser) {
     } catch {
         // fall through to the legacy check
     }
-    const adminEmail = process.env.REACT_APP_ADMIN_EMAIL;
+    const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
     if (adminEmail && firebaseUser.emailVerified &&
         firebaseUser.email?.toLowerCase() === adminEmail.toLowerCase()) {
         return "admin";

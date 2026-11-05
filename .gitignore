@@ -30,3 +30,7 @@ yarn-error.log*
 .env.*
 !.env.example
 *.pem
+
+# vite
+/dist
+*.local

@@ -4,7 +4,7 @@ import { getProducts } from '../api/products';
 import { getProductImage } from '../utils/getProductImage';
 import mainVid1 from '../assets/athlete-black-man-and-tying-shoes-in-city-for-get-2025-12-18-01-49-15-utc2_compressed.mp4';
 import mainVid1Mobile from '../assets/athlete-black-man-and-tying-shoes-on-road-for-get-2025-12-18-02-04-06-utc_compressed.mov';
-import heroImg2 from '../assets/ChatGPT Image May 7, 2026, 03_20_05 PM.png';
+import heroImg2 from '../assets/hero-2-desktop.png';
 import heroImg2Mobile from '../assets/8bb2c7a3500bad49a6c6ba61bf8f4efa.jpg';
 import img1 from '../assets/cd68aa257b0310cc65237e3e3b5b1a27.jpg';
 import img2 from '../assets/fe8686efe5c95ad56fbb4c17dfa14546.jpg';

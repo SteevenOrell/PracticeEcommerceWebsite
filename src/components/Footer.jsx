@@ -1,6 +1,6 @@
 import {React} from "react";
 import { Link } from "react-router-dom";
-import {AcmeLogo} from "./AcmeLogo.js";
+import {AcmeLogo} from "./AcmeLogo";
 
 
 function Footer(){

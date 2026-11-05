@@ -26,6 +26,9 @@ backend items, server-side work. A frontend change cannot fix them.
 - Checkout is clearly labelled as a demo, card fields are not autofilled, and they are wiped on submit.
 - The app no longer crashes when Firebase env vars are missing. Auth features are disabled instead.
 - `axios`, `react-router-dom` and `firebase` were upgraded within their major versions to clear the known high-severity advisories.
+- `vercel.json` sets a Content-Security-Policy plus `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, COOP (`same-origin-allow-popups`, needed for Google popup sign-in) and HSTS. If you add a new third-party origin (analytics, CDN, Stripe), you must allow it in the CSP.
+- Fonts are self-hosted (`@fontsource`), so the CSP does not need a third-party font CDN.
+- The CRA toolchain (`react-scripts`) was replaced by Vite. This removed the large set of build/dev-server `npm audit` findings.
 
 ## Reporting
 

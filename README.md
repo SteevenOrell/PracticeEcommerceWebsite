@@ -66,6 +66,29 @@ This is a full-stack CRUD ecommerce application built with React, React Router, 
 - **Framer Motion** — animations
 - **Font Awesome / Heroicons** — icons
 - **Vercel** — deployment
+- **Vite** — dev server and build (migrated from Create React App)
+- **Vitest + Testing Library** — unit tests; **Playwright** — portfolio screenshots/video
+
+---
+
+## Local development
+
+Requires Node.js 20.19+.
+
+```bash
+npm ci
+cp .env.example .env.local   # fill in your Firebase web config (optional: the store works without it, sign-in is disabled)
+npm run dev                  # http://localhost:3000
+npm run build && npm run preview
+npm test                     # unit tests
+npm run lint
+npm run media                # optional: screenshots + walkthrough video (needs a running dev/preview server)
+```
+
+Environment variables use the `VITE_` prefix (`VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`,
+`VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`,
+`VITE_FIREBASE_APP_ID`, `VITE_ADMIN_EMAIL`, `VITE_API_BASE_URL`). Every `VITE_*` value is public in the
+browser bundle, so never put secrets in them. See [SECURITY.md](SECURITY.md) for the security model and the open backend items.
 
 ---
 

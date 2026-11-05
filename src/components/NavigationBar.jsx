@@ -5,13 +5,13 @@ import {
     Link as NextUILink, Dropdown, DropdownTrigger, DropdownMenu,
     DropdownItem, Avatar, NavbarMenuToggle, NavbarMenu, NavbarMenuItem
 } from "@nextui-org/react";
-import { SearchIcon } from "./SearchIcon.js";
-import { AcmeLogo } from "./AcmeLogo.js";
-import { UserContext } from "./UserContextComponent.js";
-import { SearchContext } from "./SearchDataComponent.js";
-import { CartContext } from "./CartContextComponent.js";
-import { getProducts } from "../api/products.js";
-import { getProductImage } from "../utils/getProductImage.js";
+import { SearchIcon } from "./SearchIcon";
+import { AcmeLogo } from "./AcmeLogo";
+import { UserContext } from "./UserContextComponent";
+import { SearchContext } from "./SearchDataComponent";
+import { CartContext } from "./CartContextComponent";
+import { getProducts } from "../api/products";
+import { getProductImage } from "../utils/getProductImage";
 
 function Navigation() {
     const { user, logout } = useContext(UserContext);
