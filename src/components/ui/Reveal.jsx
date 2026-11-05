@@ -47,6 +47,7 @@ export function SplitHeadline({ lines, className, as = "h1" }) {
                             {line}
                         </motion.span>
                     )}
+                    {i < lines.length - 1 && <span className="sr-only"> </span>}
                 </span>
             ))}
         </Tag>
