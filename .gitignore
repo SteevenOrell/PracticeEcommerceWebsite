@@ -34,3 +34,6 @@ yarn-error.log*
 # vite
 /dist
 *.local
+
+# generated portfolio screenshots/videos
+/portfolio-media
