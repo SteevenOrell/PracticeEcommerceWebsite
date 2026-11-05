@@ -1,224 +1,195 @@
-import { useState, useEffect, useContext } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect, useContext, useRef } from "react";
+import { useParams, Link } from "react-router-dom";
+import { StarIcon } from "@heroicons/react/20/solid";
 import { CartContext } from "./CartContextComponent";
-import { StarIcon } from '@heroicons/react/20/solid';
-import { RadioGroup } from '@headlessui/react';
 import { getProduct } from "../api/products";
-import { getProductImage } from "../utils/getProductImage";
+import { getProductImages } from "../utils/getProductImage";
+import { formatPrice } from "../utils/format";
+import { useProducts } from "../hooks/useProducts";
 import { QuantitySelector } from "./ui/QuantitySelector";
+import { ProductCard } from "./ui/ProductCard";
+import { Reveal } from "./ui/Reveal";
 
-function classNames(...classes) {
-    return classes.filter(Boolean).join(' ');
+const DEMO_RATING = 4;
+
+function MobileCarousel({ images, name }) {
+    const [slide, setSlide] = useState(0);
+    const touchX = useRef(0);
+    if (!images.length) return null;
+    return (
+        <div className="relative lg:hidden" aria-roledescription="carousel" aria-label={`${name} images`}>
+            <div
+                className="overflow-hidden bg-[var(--tile)]"
+                style={{ aspectRatio: "4 / 5" }}
+                onTouchStart={e => { touchX.current = e.touches[0].clientX; }}
+                onTouchEnd={e => {
+                    const diff = touchX.current - e.changedTouches[0].clientX;
+                    if (Math.abs(diff) > 40) setSlide(i => diff > 0 ? Math.min(i + 1, images.length - 1) : Math.max(i - 1, 0));
+                }}
+            >
+                <div className="flex h-full transition-transform duration-500 ease-editorial motion-reduce:transition-none"
+                    style={{ width: `${images.length * 100}%`, transform: `translateX(-${slide * (100 / images.length)}%)` }}>
+                    {images.map((img, i) => (
+                        <div key={i} className="h-full flex-shrink-0" style={{ width: `${100 / images.length}%` }} aria-hidden={i !== slide}>
+                            <img src={img} alt={`${name} — view ${i + 1} of ${images.length}`} className="h-full w-full object-cover" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+            {slide > 0 && (
+                <button type="button" onClick={() => setSlide(i => i - 1)} className="icon-btn icon-btn-light absolute left-3 top-1/2 -translate-y-1/2" aria-label="Previous image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="18" height="18" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+                </button>
+            )}
+            {slide < images.length - 1 && (
+                <button type="button" onClick={() => setSlide(i => i + 1)} className="icon-btn icon-btn-light absolute right-3 top-1/2 -translate-y-1/2" aria-label="Next image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="18" height="18" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
+                </button>
+            )}
+            <div className="mt-3 flex items-center justify-center gap-1">
+                {images.map((_, i) => (
+                    <button key={i} type="button" onClick={() => setSlide(i)} aria-label={`Show image ${i + 1}`} aria-current={i === slide}
+                        className="flex h-6 w-6 items-center justify-center">
+                        <span className={`block h-1.5 rounded-full transition-all ${i === slide ? "w-5 bg-white" : "w-1.5 bg-white/40"}`} />
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function DetailsSkeleton() {
+    return (
+        <div className="container-x grid gap-10 py-10 lg:grid-cols-12" aria-busy="true" aria-label="Loading product">
+            <div className="skeleton lg:col-span-7" style={{ aspectRatio: "16 / 13" }} />
+            <div className="space-y-4 lg:col-span-4 lg:col-start-9">
+                <div className="skeleton h-4 w-24" /><div className="skeleton h-14 w-4/5" /><div className="skeleton h-6 w-24" /><div className="skeleton mt-10 h-12 w-full" />
+            </div>
+        </div>
+    );
 }
 
 function Details() {
-    const [product, setProduct] = useState({});
-    const [images, setImages] = useState([]);
-    const [qty, setQty] = useState(1);
-    const [currentSlide, setCurrentSlide] = useState(0);
-    const { addToCart } = useContext(CartContext);
-    const navigate = useNavigate();
     const { id } = useParams();
-
-    const reviews = { href: '#', average: 4, totalCount: 117 };
+    const [product, setProduct] = useState(null);
+    const [status, setStatus] = useState("loading");
+    const [qty, setQty] = useState(1);
+    const [added, setAdded] = useState(false);
+    const { addToCart } = useContext(CartContext);
+    const { products } = useProducts();
 
     useEffect(() => {
-        if (/^\d{1,9}$/.test(id || "")) {
-            getProduct(id)
-                .then(res => {
-                    if (res.data !== null) {
-                        setProduct(res.data);
-                        const imgs = Array.from({ length: 5 }, (_, i) =>
-                            getProductImage(res.data["image-folder-name"], i + 1)
-                        ).filter(Boolean);
-                        setImages(imgs);
-                    }
-                })
-                .catch(() => navigate("/"));
-        }
-    }, [id, navigate]);
+        setQty(1); setAdded(false);
+        if (!/^\d{1,9}$/.test(id || "")) { setStatus("notfound"); return; }
+        let alive = true;
+        setStatus("loading");
+        getProduct(id)
+            .then(res => { if (!alive) return; if (res.data) { setProduct(res.data); setStatus("ready"); } else setStatus("notfound"); })
+            .catch(err => { if (alive) setStatus(err?.response?.status === 404 ? "notfound" : "error"); });
+        return () => { alive = false; };
+    }, [id]);
+
+    if (status === "loading") return <main id="main"><DetailsSkeleton /></main>;
+    if (status !== "ready") {
+        return (
+            <main id="main" className="container-x py-32 text-center">
+                <h1 className="display-lg">{status === "notfound" ? "Product not found" : "Something went wrong"}</h1>
+                <p className="muted mt-4">{status === "notfound" ? "This product doesn't exist or is no longer available." : "We couldn't load this product. Please try again."}</p>
+                <Link to="/products" className="btn btn-primary mt-8">Browse all shoes</Link>
+            </main>
+        );
+    }
+
+    const name = product["article-name"];
+    const images = getProductImages(product["image-folder-name"]);
+    const related = products.filter(p => p.id !== product.id && p.purpose === product.purpose).slice(0, 8);
+
+    function handleAdd(e) {
+        e.preventDefault();
+        addToCart(product, qty);
+        setAdded(true);
+    }
 
     return (
-        <div>
-            <div className="pt-6">
+        <main id="main">
+            <nav aria-label="Breadcrumb" className="container-x pt-6 text-sm muted">
+                <ol className="flex flex-wrap gap-2">
+                    <li><Link to="/" className="hover:text-white">Home</Link> /</li>
+                    <li><Link to="/products" className="hover:text-white">Shop</Link> /</li>
+                    {product.purpose && <li><Link to={`/products?purpose=${encodeURIComponent(product.purpose)}`} className="hover:text-white">{product.purpose}</Link> /</li>}
+                    <li aria-current="page" className="text-white">{name}</li>
+                </ol>
+            </nav>
 
-                {/* Mobile carousel */}
-                {images.length > 0 && (
-                    <div className="relative lg:hidden mx-auto mt-6 max-w-2xl px-4 sm:px-6">
-                        <div
-                            className="overflow-hidden rounded-2xl bg-gray-900 w-full"
-                            style={{ aspectRatio: '4/5' }}
-                            onTouchStart={e => { e.currentTarget._touchX = e.touches[0].clientX; }}
-                            onTouchEnd={e => {
-                                const diff = e.currentTarget._touchX - e.changedTouches[0].clientX;
-                                if (Math.abs(diff) > 40) {
-                                    setCurrentSlide(i =>
-                                        diff > 0
-                                            ? Math.min(i + 1, images.length - 1)
-                                            : Math.max(i - 1, 0)
-                                    );
-                                }
-                            }}
-                        >
-                            <div
-                                className="flex h-full transition-transform duration-300 ease-in-out"
-                                style={{
-                                    width: `${images.length * 100}%`,
-                                    transform: `translateX(-${currentSlide * (100 / images.length)}%)`
-                                }}
-                            >
-                                {images.map((img, i) => (
-                                    <div
-                                        key={i}
-                                        className="h-full flex-shrink-0"
-                                        style={{ width: `${100 / images.length}%` }}
-                                    >
-                                        <img
-                                            src={img}
-                                            alt={`${product["article-name"]} - view ${i + 1}`}
-                                            className="h-full w-full object-cover"
-                                        />
-                                    </div>
-                                ))}
+            <div className="mt-6 lg:container-x lg:grid lg:grid-cols-12 lg:gap-12">
+                <div className="lg:col-span-7">
+                    <MobileCarousel images={images} name={name} />
+                    <div className="pdp-gallery hidden lg:grid">
+                        {images.map((img, i) => (
+                            <div className="pdp-img" key={i}>
+                                <img src={img} alt={`${name} — view ${i + 1}`} loading={i < 2 ? "eager" : "lazy"} />
                             </div>
-                        </div>
-
-                        {currentSlide > 0 && (
-                            <button
-                                onClick={() => setCurrentSlide(i => i - 1)}
-                                className="absolute left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/20 text-white flex items-center justify-center shadow-md hover:bg-black/65 transition-colors"
-                                aria-label="Previous image"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                                </svg>
-                            </button>
-                        )}
-
-                        {currentSlide < images.length - 1 && (
-                            <button
-                                onClick={() => setCurrentSlide(i => i + 1)}
-                                className="absolute right-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/20 text-white flex items-center justify-center shadow-md hover:bg-black/65 transition-colors"
-                                aria-label="Next image"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                                </svg>
-                            </button>
-                        )}
-
-                        <div className="flex justify-center items-center gap-2 mt-3">
-                            {images.map((_, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => setCurrentSlide(i)}
-                                    className={`h-2 rounded-full transition-all duration-300 ${i === currentSlide ? 'w-5 bg-white' : 'w-2 bg-white/35 hover:bg-white/60'}`}
-                                    aria-label={`Go to image ${i + 1}`}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Desktop image gallery */}
-                <div className="mx-auto mt-6 max-w-2xl sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-3 lg:gap-x-8 lg:px-8">
-                    <div className="aspect-h-4 aspect-w-3 hidden overflow-hidden rounded-lg lg:block">
-                        <img src={images[0]} alt={product["article-name"]} className="h-full w-full object-cover object-center" />
-                    </div>
-                    <div className="hidden lg:grid lg:grid-cols-1 lg:gap-y-8">
-                        <div className="aspect-h-2 aspect-w-3 overflow-hidden rounded-lg">
-                            <img src={images[1]} alt={product["article-name"]} className="h-full w-full object-cover object-center" />
-                        </div>
-                        <div className="aspect-h-2 aspect-w-3 overflow-hidden rounded-lg">
-                            <img src={images[2]} alt={product["article-name"]} className="h-full w-full object-cover object-center" />
-                        </div>
-                    </div>
-                    <div className="hidden lg:block aspect-h-4 aspect-w-3 overflow-hidden rounded-lg">
-                        <img src={images[3]} alt={product["article-name"]} className="h-full w-full object-cover object-center" />
+                        ))}
                     </div>
                 </div>
 
-                {/* Product info */}
-                <div className="mx-auto max-w-2xl px-4 pb-16 pt-10 sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-3 lg:grid-rows-[auto,auto,1fr] lg:gap-x-8 lg:px-8 lg:pb-24 lg:pt-16">
-                    <div className="lg:col-span-2 lg:border-r lg:border-white-200 lg:pr-8">
-                        <h1 className="text-2xl font-bold tracking-tight text-white-900 sm:text-3xl">{product["article-name"]}</h1>
-                    </div>
+                <div className="container-x mt-8 lg:col-span-5 lg:mt-0 lg:px-0">
+                    <div className="pdp-panel">
+                        <p className="eyebrow">{[product.purpose, product.gender && `${product.gender}'s`].filter(Boolean).join(" · ")}</p>
+                        <h1 className="display-lg mt-3">{name}</h1>
+                        <p className="mt-4 text-2xl font-semibold">{formatPrice(product.price)}</p>
 
-                    <div className="mt-4 lg:row-span-3 lg:mt-0">
-                        <h2 className="sr-only">Product information</h2>
-                        <p className="text-3xl tracking-tight text-white-900">$ {product["price"]}</p>
-
-                        <div className="mt-6">
-                            <h3 className="sr-only">Reviews</h3>
-                            <div className="flex items-center">
-                                <div className="flex items-center">
-                                    {[0, 1, 2, 3, 4].map((rating) => (
-                                        <StarIcon
-                                            key={rating}
-                                            className={classNames(
-                                                reviews.average > rating ? 'text-white-900' : 'text-white-200',
-                                                'h-5 w-5 flex-shrink-0'
-                                            )}
-                                            aria-hidden="true"
-                                        />
-                                    ))}
-                                </div>
-                                <p className="sr-only">{reviews.average} out of 5 stars</p>
-                                <a href={reviews.href} className="ml-3 text-sm font-medium text-gray-600 hover:text-gray-500">
-                                    {reviews.totalCount} reviews
-                                </a>
+                        <div className="mt-3 flex items-center gap-2">
+                            <div className="flex" aria-hidden="true">
+                                {[0, 1, 2, 3, 4].map(r => <StarIcon key={r} className={`h-4 w-4 ${DEMO_RATING > r ? "text-white" : "text-white/25"}`} />)}
                             </div>
+                            <span className="text-sm muted">{DEMO_RATING}.0 out of 5 · demo rating</span>
                         </div>
 
-                        <form className="mt-10">
+                        <form className="mt-10 space-y-8" onSubmit={handleAdd}>
                             <div>
-                                <h3 className="text-sm font-medium text-gray-300">Color</h3>
-                                <p>{product.color}</p>
+                                <p className="text-sm font-semibold">Color</p>
+                                <p className="mt-1 muted">{product.color}</p>
                             </div>
 
-                            <div className="mt-10">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-sm font-medium text-gray-300">Size</h3>
-                                    <button type="button" className="text-sm font-medium text-gray-600 hover:text-gray-500">
-                                        Size guide
-                                    </button>
+                            <fieldset>
+                                <legend className="text-sm font-semibold">Size (US)</legend>
+                                <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label="Size">
+                                    <button type="button" role="radio" aria-checked="true" className="size-pill">{product.size}</button>
                                 </div>
-                                <RadioGroup className="mt-4">
-                                    <div className="grid grid-cols-4 gap-4 sm:grid-cols-8 lg:grid-cols-4">
-                                        <RadioGroup.Option value={product["size"]}>
-                                            <RadioGroup.Label as="span">{product["size"]}</RadioGroup.Label>
-                                        </RadioGroup.Option>
-                                    </div>
-                                </RadioGroup>
+                                <p className="mt-2 text-xs muted">Only one size is in stock for this pair.</p>
+                            </fieldset>
+
+                            <div className="flex flex-wrap items-center gap-4">
+                                <QuantitySelector value={qty} onChange={setQty} />
+                                <button type="submit" className="btn btn-primary flex-1 !min-h-[56px] text-base">Add to bag</button>
                             </div>
-
-                            <QuantitySelector
-                                value={qty}
-                                onChange={setQty}
-                                className="DetailsQtySelector"
-                            />
-
-                            <button
-                                type="submit"
-                                className="mt-4 flex w-full items-center justify-center rounded-md border border-transparent bg-gray-700 px-8 py-3 text-base font-medium text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                                onClick={e => { e.preventDefault(); addToCart(product, qty); }}
-                            >
-                                Add to bag
-                            </button>
+                            <p className="text-sm muted" role="status" aria-live="polite">{added ? `${name} added to your bag.` : ""}</p>
                         </form>
-                    </div>
 
-                    <div className="py-10 lg:col-span-2 lg:col-start-1 lg:border-r lg:border-white-200 lg:pb-16 lg:pr-8 lg:pt-6">
-                        <div>
-                            <h3 className="sr-only">Description</h3>
-                            <div className="space-y-6">
-                                <p className="text-base text-white-900">{product.description}</p>
-                            </div>
+                        <div className="mt-6">
+                            <details className="accordion" open>
+                                <summary>Description <span className="chev" aria-hidden="true">⌄</span></summary>
+                                <div className="accordion-body">{product.description}</div>
+                            </details>
+                            <details className="accordion">
+                                <summary>Free delivery &amp; returns <span className="chev" aria-hidden="true">⌄</span></summary>
+                                <div className="accordion-body">Demo store: orders aren't fulfilled. In a live store, this panel would show delivery estimates and a 30-day return policy.</div>
+                            </details>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            {related.length > 0 && (
+                <section className="section container-x" aria-labelledby="related-title">
+                    <Reveal><h2 id="related-title" className="display-md">You might also like</h2></Reveal>
+                    <ul className="rail mt-10">
+                        {related.map(p => <li key={p.id}><ProductCard product={p} /></li>)}
+                    </ul>
+                </section>
+            )}
+        </main>
     );
 }
 

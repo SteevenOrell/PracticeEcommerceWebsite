@@ -108,11 +108,14 @@ function ManageUsers() {
 
     return (
         <>
-            <div className="flex w-full flex-col">
+            <main id="main" className="admin-shell flex w-full flex-col">
+                <p className="eyebrow">Admin</p>
+                <h1 className="display-lg mb-8 mt-2">Manage users</h1>
+                <p className="notice mb-8" role="note">Admin screens are UI-gated only. The users API behind them is public, so treat every record here as public demo data. See SECURITY.md.</p>
                 <Tabs id="ManagerUserTab" aria-label="Options">
                     <Tab key="ViewUsers" title="View Users">
                         <div id="DivTableUsers">
-                            <h1 id="TitleUserList">List of Users</h1>
+                            <h2 id="TitleUserList">List of users</h2>
                             <Table id="TableUsers" aria-label="Users table">
                                 <TableHeader columns={columnHeader}>
                                     {(col) => (
@@ -219,7 +222,7 @@ function ManageUsers() {
                         </form>
                     </Tab>
                 </Tabs>
-            </div>
+            </main>
 
             {isNotifDisplayed && (
                 <Toast

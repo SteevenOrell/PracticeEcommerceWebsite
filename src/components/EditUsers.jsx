@@ -66,7 +66,7 @@ function EditUsers() {
                     onClose={() => setNotif(false)}
                 />
             )}
-            <form id="EditSingleUserForm">
+            <form id="EditSingleUserForm" aria-label="Edit user">
                 <div className="space-y-12">
                     <div className="border-b border-white-900/10 pb-12">
                         <h2 className="text-base font-semibold leading-7 text-white-900">Edit User</h2>

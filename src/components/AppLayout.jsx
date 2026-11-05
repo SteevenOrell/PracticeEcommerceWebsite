@@ -7,6 +7,7 @@ import ScrollToTop from "./ScrollToTop";
 function AppLayout() {
     return (
         <>
+            <a href="#main" className="skip-link">Skip to content</a>
             <ScrollToTop />
             <Navigation />
             <CartSidebar />

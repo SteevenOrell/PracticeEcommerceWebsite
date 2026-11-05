@@ -3,75 +3,62 @@ import { Link, useNavigate } from "react-router-dom";
 import { CartContext } from "./CartContextComponent";
 import { QuantitySelector } from "./ui/QuantitySelector";
 import { getProductImage } from "../utils/getProductImage";
+import { formatPrice } from "../utils/format";
 
 function CartPage() {
-    const { cartItems, cartTotal, removeFromCart, updateQuantity } = useContext(CartContext);
+    const { cartItems, cartTotal, cartCount, removeFromCart, updateQuantity } = useContext(CartContext);
     const navigate = useNavigate();
 
     return (
-        <div id="CartPageWrapper">
-            <h1 id="CartPageTitle">Shopping Cart</h1>
+        <main id="main" className="container-x pb-24 pt-14 md:pt-20">
+            <p className="eyebrow">Your bag</p>
+            <h1 className="display-lg mt-3">Bag{cartCount > 0 && <span className="muted"> ({cartCount})</span>}</h1>
 
             {cartItems.length === 0 ? (
-                <div id="CartPageEmpty">
-                    <p>Your cart is empty.</p>
-                    <Link to="/products" id="CartPageShopLink">Continue Shopping →</Link>
+                <div className="py-24">
+                    <p className="lede">Your bag is empty.</p>
+                    <p className="muted mt-3">Items you add will show up here.</p>
+                    <Link to="/products" className="btn btn-primary mt-8">Continue shopping</Link>
                 </div>
             ) : (
-                <div id="CartPageContent">
-                    <div id="CartPageItems">
+                <div className="mt-12 grid gap-12 lg:grid-cols-12">
+                    <ul className="lg:col-span-8">
                         {cartItems.map(item => (
-                            <div className="CartPageItem" key={item.id}>
-                                <div className="CartPageItemImg">
-                                    <img
-                                        src={getProductImage(item["image-folder-name"])}
-                                        alt={item["article-name"]}
-                                    />
-                                </div>
-                                <div className="CartPageItemDetails">
-                                    <p className="CartPageItemName">{item["article-name"]}</p>
-                                    <p className="CartPageItemMeta">{item.color} · Size {item.size}</p>
-                                    <p className="CartPageItemUnitPrice">${parseFloat(item.price).toFixed(2)} each</p>
-                                    <div className="CartPageItemActions">
-                                        <QuantitySelector
-                                            value={item.quantity}
-                                            onChange={(qty) => updateQuantity(item.id, qty)}
-                                            className="CartQtyControls"
-                                        />
-                                        <button className="CartPageRemoveBtn" onClick={() => removeFromCart(item.id)}>
-                                            Remove
+                            <li className="line-item lg" key={item.id}>
+                                <Link to={`/details/${encodeURIComponent(item.id)}`} className="line-item-img" aria-label={`View ${item["article-name"]}`}>
+                                    <img src={getProductImage(item["image-folder-name"])} alt="" />
+                                </Link>
+                                <div className="min-w-0">
+                                    <p className="text-lg font-semibold">{item["article-name"]}</p>
+                                    <p className="muted mt-1 text-sm">{[item.purpose, item.color, item.size && `US ${item.size}`].filter(Boolean).join(" · ")}</p>
+                                    <p className="muted mt-1 text-sm">{formatPrice(item.price)} each</p>
+                                    <div className="mt-4 flex items-center gap-4">
+                                        <QuantitySelector value={item.quantity} onChange={qty => updateQuantity(item.id, qty)} label={`Quantity for ${item["article-name"]}`} />
+                                        <button type="button" className="link-underline text-sm muted hover:text-white" onClick={() => removeFromCart(item.id)}>
+                                            Remove<span className="sr-only"> {item["article-name"]}</span>
                                         </button>
                                     </div>
                                 </div>
-                                <p className="CartPageItemTotal">
-                                    ${(parseFloat(item.price) * item.quantity).toFixed(2)}
-                                </p>
-                            </div>
+                                <p className="text-lg font-semibold">{formatPrice(Number.parseFloat(item.price) * item.quantity)}</p>
+                            </li>
                         ))}
-                    </div>
+                    </ul>
 
-                    <div id="CartPageSummary">
-                        <h2>Order Summary</h2>
-                        <div className="CartSummaryRow">
-                            <span>Subtotal</span>
-                            <span>${cartTotal.toFixed(2)}</span>
+                    <aside className="lg:col-span-4" aria-labelledby="summary-title">
+                        <div className="summary-card lg:sticky lg:top-[calc(var(--nav-h)+2rem)]">
+                            <h2 id="summary-title" className="display text-3xl">Summary</h2>
+                            <div className="mt-6">
+                                <div className="summary-row"><span>Subtotal</span><span>{formatPrice(cartTotal)}</span></div>
+                                <div className="summary-row"><span>Shipping</span><span className="text-[var(--accent)]">Free</span></div>
+                                <div className="summary-row summary-total"><span>Total</span><span>{formatPrice(cartTotal)}</span></div>
+                            </div>
+                            <button type="button" className="btn btn-primary btn-block mt-6" onClick={() => navigate("/checkout")}>Checkout</button>
+                            <Link to="/products" className="link-underline mt-4 block text-center text-sm">Continue shopping</Link>
                         </div>
-                        <div className="CartSummaryRow">
-                            <span>Shipping</span>
-                            <span className="CartSummaryFree">Free</span>
-                        </div>
-                        <div className="CartSummaryRow CartSummaryTotal">
-                            <span>Total</span>
-                            <span>${cartTotal.toFixed(2)}</span>
-                        </div>
-                        <button id="CartCheckoutBtn" onClick={() => navigate("/checkout")}>
-                            Proceed to Checkout
-                        </button>
-                        <Link to="/products" id="CartContinueShopping">Continue Shopping</Link>
-                    </div>
+                    </aside>
                 </div>
             )}
-        </div>
+        </main>
     );
 }
 

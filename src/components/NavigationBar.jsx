@@ -1,269 +1,197 @@
-import { useState, useEffect, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-    Navbar, NavbarBrand, NavbarContent, Input, NavbarItem,
-    Link as NextUILink, Dropdown, DropdownTrigger, DropdownMenu,
-    DropdownItem, Avatar, NavbarMenuToggle, NavbarMenu, NavbarMenuItem
-} from "@nextui-org/react";
+import { useState, useEffect, useContext, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Avatar } from "@nextui-org/react";
 import { SearchIcon } from "./SearchIcon";
 import { AcmeLogo } from "./AcmeLogo";
 import { UserContext } from "./UserContextComponent";
 import { SearchContext } from "./SearchDataComponent";
 import { CartContext } from "./CartContextComponent";
-import { getProducts } from "../api/products";
+import { useProducts } from "../hooks/useProducts";
 import { getProductImage } from "../utils/getProductImage";
+import { formatPrice } from "../utils/format";
 
-function Navigation() {
-    const { user, logout } = useContext(UserContext);
+const LINKS = [
+    { label: "New & Featured", to: "/products" },
+    { label: "Lifestyle", to: "/products?purpose=Lifestyle" },
+    { label: "Football", to: "/products?purpose=Football" },
+];
+
+function safeImageUrl(url) {
+    try { const u = new URL(url); return u.protocol === "https:" ? u.href : undefined; } catch { return undefined; }
+}
+
+function SearchOverlay({ onClose }) {
     const { setSearch } = useContext(SearchContext);
-    const { cartCount, openSidebar } = useContext(CartContext);
-    const [links] = useState(["Men", "Women", "Kids", "Accessories"]);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [products, setProducts] = useState([]);
-    const [productsFound, setProductsFound] = useState([]);
-    const [isSearchDataFound, setSearchDataFound] = useState(true);
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [width, setWidth] = useState(window.innerWidth);
-
+    const { products } = useProducts();
+    const [query, setQuery] = useState("");
     const navigate = useNavigate();
+    const inputRef = useRef(null);
 
     useEffect(() => {
-        getProducts().then(res => {
-            if (res.data.length > 0) setProducts(res.data);
-        });
-    }, []);
+        inputRef.current?.focus();
+        document.body.style.overflow = "hidden";
+        const onKey = (e) => { if (e.key === "Escape") onClose(); };
+        document.addEventListener("keydown", onKey);
+        return () => { document.body.style.overflow = ""; document.removeEventListener("keydown", onKey); };
+    }, [onClose]);
 
-    useEffect(() => {
-        function handleResize() { setWidth(window.innerWidth); }
-        window.addEventListener("resize", handleResize);
-        handleResize();
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
+    const q = query.trim().toLowerCase();
+    const results = q ? products.filter(p => p["article-name"]?.toLowerCase().includes(q)).slice(0, 4) : [];
 
-    useEffect(() => {
-        if (isSearchOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "";
-        }
-        return () => { document.body.style.overflow = ""; };
-    }, [isSearchOpen]);
-
-    function handleLogout() {
-        logout();
-        navigate("/login");
-    }
-
-    function handleOverlaySearch(e) {
-        const val = e.target.value;
-        setSearchQuery(val);
-        setSearch(val);
-
-        if (val.trim() === "") {
-            setProductsFound([]);
-            setSearchDataFound(true);
-            return;
-        }
-
-        const results = products.filter(item =>
-            item["article-name"].toLowerCase().includes(val.toLowerCase())
-        );
-
-        if (results.length > 0) {
-            setProductsFound(results.slice(0, 4));
-            setSearchDataFound(true);
-        } else {
-            setProductsFound([]);
-            setSearchDataFound(false);
-        }
-    }
-
-    function handleCancel() {
-        setIsSearchOpen(false);
-        setSearchQuery("");
-        setSearch("");
-        setProductsFound([]);
-        setSearchDataFound(true);
+    function submit(e) {
+        e.preventDefault();
+        setSearch(query.trim());
+        onClose();
+        navigate("/products");
     }
 
     return (
         <>
-            {isSearchOpen && <div id="SearchBackdrop" onClick={handleCancel} />}
-
-            {isSearchOpen && (
-                <div id="SearchOverlay">
-                    <div id="SearchOverlayHeader">
-                        <Link to="/" onClick={handleCancel} id="SearchOverlayLogo">
-                            <AcmeLogo />
-                        </Link>
-                        <Input
-                            autoFocus
-                            value={searchQuery}
-                            onChange={handleOverlaySearch}
-                            classNames={{
-                                base: "flex-1 h-12",
-                                mainWrapper: "h-full",
-                                input: "text-base",
-                                inputWrapper: "h-full font-normal text-white bg-white/10 border border-white/20",
-                            }}
-                            placeholder="Search products..."
-                            size="md"
-                            startContent={<SearchIcon size={20} />}
-                            type="search"
+            <div id="SearchBackdrop" onClick={onClose} aria-hidden="true" />
+            <div id="SearchOverlay" role="dialog" aria-modal="true" aria-label="Search products">
+                <form id="SearchOverlayHeader" role="search" onSubmit={submit}>
+                    <Link to="/" onClick={onClose} className="hidden sm:block" aria-label="Home"><AcmeLogo /></Link>
+                    <label htmlFor="site-search" className="sr-only">Search products</label>
+                    <div className="flex h-12 flex-1 items-center gap-3 rounded-full bg-white/10 px-4">
+                        <SearchIcon size={20} />
+                        <input
+                            id="site-search" ref={inputRef} type="search" value={query} onChange={e => setQuery(e.target.value)}
+                            placeholder="Search shoes" autoComplete="off" maxLength={80}
+                            className="h-full flex-1 bg-transparent text-base outline-none placeholder:text-white/50"
                         />
-                        <button id="SearchCancelBtn" onClick={handleCancel}>Cancel</button>
                     </div>
+                    <button type="button" className="text-sm font-semibold" onClick={onClose}>Cancel</button>
+                </form>
 
-                    <div id="SearchResults">
-                        {searchQuery.trim() !== "" && !isSearchDataFound && (
-                            <p id="SearchNotFound">Product not found</p>
-                        )}
-                        {productsFound.length > 0 && (
-                            <div id="SearchResultsGrid">
-                                {productsFound.map(product => (
-                                    <Link
-                                        to={`/details/${product.id}`}
-                                        key={product.id}
-                                        onClick={handleCancel}
-                                        className="SearchProductCard"
-                                    >
-                                        <div className="SearchProductImgWrapper">
-                                            <img
-                                                src={getProductImage(product["image-folder-name"])}
-                                                alt={product["article-name"]}
-                                            />
-                                        </div>
-                                        <p className="SearchProductName">{product["article-name"]}</p>
-                                        <p className="SearchProductPrice">${product.price}</p>
-                                    </Link>
+                <div id="SearchResults" aria-live="polite">
+                    {q && results.length === 0 && <p className="muted">No products match “{query}”.</p>}
+                    {!q && (
+                        <div>
+                            <p className="eyebrow">Popular searches</p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                                {["Jordan", "Yeezy", "Mercurial", "Dunk"].map(t => (
+                                    <button key={t} type="button" className="chip" onClick={() => setQuery(t)}>{t}</button>
                                 ))}
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
+                    {results.length > 0 && (
+                        <ul id="SearchResultsGrid">
+                            {results.map(p => (
+                                <li key={p.id}>
+                                    <Link to={`/details/${encodeURIComponent(p.id)}`} onClick={onClose} className="product-card">
+                                        <div className="product-card-media"><img className="primary" src={getProductImage(p["image-folder-name"])} alt="" /></div>
+                                        <div className="product-card-body">
+                                            <p className="product-card-name">{p["article-name"]}</p>
+                                            <p className="product-card-price">{formatPrice(p.price)}</p>
+                                        </div>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
-            )}
+            </div>
+        </>
+    );
+}
 
-            <Navbar isBordered isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen} className="main-nav" classNames={{ wrapper: "px-8 max-w-full h-full" }}>
-                <NavbarContent className="sm:hidden" justify="start">
-                    <NavbarMenuToggle aria-label={isMenuOpen ? "Close menu" : "Open menu"} />
-                </NavbarContent>
-                <NavbarContent className="hidden sm:flex gap-3" justify="start">
-                    {links.map((link) => (
-                        <NavbarItem key={`key${link}`}>
-                            <NextUILink color="foreground" href="/products">{link}</NextUILink>
-                        </NavbarItem>
-                    ))}
-                </NavbarContent>
-                {width < 639
-                    ? <NavbarContent className="sm:hidden pr-3" justify="center">
-                        <NavbarBrand>
-                            <Link to="/"><AcmeLogo /></Link>
-                        </NavbarBrand>
-                    </NavbarContent>
-                    : <NavbarContent justify="center">
-                        <NavbarBrand>
-                            <Link to="/"><AcmeLogo /></Link>
-                        </NavbarBrand>
-                    </NavbarContent>
-                }
+function Navigation() {
+    const { user, logout } = useContext(UserContext);
+    const { cartCount, openSidebar } = useContext(CartContext);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const location = useLocation();
+    const navigate = useNavigate();
 
-                <NavbarContent as="div" className="items-center" justify="end">
-                    {user === null && width > 639 && (
-                        <Link to="/login" className="text-sm font-medium text-default-600 hover:text-default-900 whitespace-nowrap">Sign in</Link>
-                    )}
+    useEffect(() => { setMenuOpen(false); }, [location.pathname, location.search]);
+    useEffect(() => {
+        if (!menuOpen) return undefined;
+        const onKey = (e) => { if (e.key === "Escape") setMenuOpen(false); };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+    }, [menuOpen]);
 
-                    {width < 639 && user === null
-                        ? <button id="NavSearchIconBtn" onClick={() => setIsSearchOpen(true)}>
-                            <SearchIcon size={22} />
-                          </button>
-                        : width >= 639
-                            ? <Input
-                                onClick={() => setIsSearchOpen(true)}
-                                onFocus={() => setIsSearchOpen(true)}
-                                readOnly
-                                classNames={{
-                                    base: "max-w-full sm:max-w-[10rem] h-10 cursor-pointer",
-                                    mainWrapper: "h-full",
-                                    input: "text-small cursor-pointer",
-                                    inputWrapper: "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20 cursor-pointer",
-                                }}
-                                placeholder="Search..."
-                                size="sm"
-                                startContent={<SearchIcon size={18} />}
-                                type="search"
-                              />
-                            : null
-                    }
+    const closeSearch = useRef(() => setSearchOpen(false)).current;
+    const isActive = (to) => (location.pathname + location.search) === to;
 
-                    <button id="CartIconWrapper" onClick={openSidebar}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width={24} height={24}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                        </svg>
-                        {cartCount > 0 && <span id="CartBadge">{cartCount}</span>}
-                    </button>
+    async function handleLogout() {
+        await logout();
+        navigate("/login");
+    }
 
-                    {user !== null && (
-                        <Dropdown placement="bottom-end">
-                            <DropdownTrigger>
-                                <Avatar
-                                    isBordered
-                                    as="button"
-                                    className="transition-transform"
-                                    color="default"
-                                    name={user["name"]}
-                                    size="sm"
-                                    src={user["avatar"]}
-                                />
-                            </DropdownTrigger>
-                            <DropdownMenu aria-label="Profile Actions" variant="flat">
-                                <DropdownItem key="profile" className="h-14 gap-2">
-                                    <p className="font-semibold">Signed in as</p>
-                                    <p className="font-semibold">{user["email"]}</p>
-                                </DropdownItem>
-                                <DropdownItem key="settings" onPress={() => navigate("/edit-your-profile")}>
-                                    My Account
-                                </DropdownItem>
-                                {user["user-role"] === "admin" && (
-                                    <DropdownItem key="system" onPress={() => navigate("/manage-users")}>
-                                        Manage Users (Admin only)
+    return (
+        <>
+            {searchOpen && <SearchOverlay onClose={closeSearch} />}
+
+            <header className="main-nav sticky top-0 z-50">
+                <nav className="container-x grid h-full grid-cols-[1fr_auto_1fr] items-center" aria-label="Main">
+                    <div className="flex items-center gap-1">
+                        <button type="button" className="icon-btn md:hidden" aria-expanded={menuOpen} aria-controls="mobile-menu"
+                            aria-label={menuOpen ? "Close menu" : "Open menu"} onClick={() => setMenuOpen(o => !o)}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="22" height="22" aria-hidden="true">
+                                {menuOpen ? <path d="M6 6l12 12M18 6 6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+                            </svg>
+                        </button>
+                        <ul className="hidden items-center gap-5 md:flex">
+                            {LINKS.map(l => (
+                                <li key={l.label}><Link to={l.to} className="nav-link" aria-current={isActive(l.to) ? "page" : undefined}>{l.label}</Link></li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <Link to="/" aria-label="Clodio Vendem home" className="justify-self-center"><AcmeLogo /></Link>
+
+                    <div className="flex items-center justify-end gap-1">
+                        <button type="button" className="icon-btn sm:!w-auto sm:gap-2 sm:rounded-full sm:bg-white/10 sm:px-4" onClick={() => setSearchOpen(true)} aria-label="Search products">
+                            <SearchIcon size={18} /><span className="hidden text-sm text-white/70 sm:inline">Search</span>
+                        </button>
+
+                        {user ? (
+                            <Dropdown placement="bottom-end">
+                                <DropdownTrigger>
+                                    <Avatar as="button" size="sm" className="ml-1 transition-transform" name={user.name} src={safeImageUrl(user.avatar)} aria-label="Account menu" />
+                                </DropdownTrigger>
+                                <DropdownMenu aria-label="Account actions" variant="flat">
+                                    <DropdownItem key="profile" className="h-14 gap-2" textValue="Signed in" isReadOnly>
+                                        <p className="text-xs opacity-70">Signed in as</p>
+                                        <p className="font-semibold">{user.email}</p>
                                     </DropdownItem>
-                                )}
-                                <DropdownItem key="logout" color="danger" onPress={handleLogout}>
-                                    Log Out
-                                </DropdownItem>
-                            </DropdownMenu>
-                        </Dropdown>
-                    )}
+                                    <DropdownItem key="settings" onPress={() => navigate("/edit-your-profile")}>My account</DropdownItem>
+                                    {user["user-role"] === "admin" && (
+                                        <DropdownItem key="admin" onPress={() => navigate("/manage-users")}>Manage users</DropdownItem>
+                                    )}
+                                    <DropdownItem key="logout" color="danger" onPress={handleLogout}>Log out</DropdownItem>
+                                </DropdownMenu>
+                            </Dropdown>
+                        ) : (
+                            <Link to="/login" className="nav-link hidden px-3 sm:inline-block">Sign in</Link>
+                        )}
 
-                    <NavbarMenu className="z-30 px-6 pt-6 fixed flex max-w-full top-[var(--navbar-height)] inset-x-0 bottom-0 w-screen flex-col gap-2 overflow-y-auto backdrop-blur-xl backdrop-saturate-150 bg-background/70">
-                        {user === null
-                            ? <NavbarMenuItem key="mobile-SignIn">
-                                <Link to="/login">
-                                    <NextUILink className="w-full" color="foreground" href="/login" size="lg">
-                                        Sign In
-                                    </NextUILink>
-                                </Link>
-                              </NavbarMenuItem>
-                            : <NavbarMenuItem key="mobile-Search">
-                                <button
-                                    id="MobileMenuSearchBtn"
-                                    onClick={() => { setIsSearchOpen(true); setIsMenuOpen(false); }}
-                                >
-                                    Search <SearchIcon size={20} />
-                                </button>
-                              </NavbarMenuItem>
-                        }
-                        {links.map((item, index) => (
-                            <NavbarMenuItem key={`${item}-${index}`}>
-                                <NextUILink className="w-full" color="foreground" href="/products" size="lg">
-                                    {item}
-                                </NextUILink>
-                            </NavbarMenuItem>
-                        ))}
-                    </NavbarMenu>
-                </NavbarContent>
-            </Navbar>
+                        <button id="CartIconWrapper" type="button" className="icon-btn" onClick={openSidebar}
+                            aria-label={`Open bag, ${cartCount} ${cartCount === 1 ? "item" : "items"}`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.6} stroke="currentColor" width={22} height={22} aria-hidden="true">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z" />
+                            </svg>
+                            {cartCount > 0 && <span id="CartBadge" aria-hidden="true">{cartCount}</span>}
+                        </button>
+                    </div>
+                </nav>
+
+                {menuOpen && (
+                    <div id="mobile-menu" className="fixed inset-x-0 bottom-0 top-[var(--nav-h)] z-40 overflow-y-auto bg-[var(--ink)] px-[var(--gutter)] py-8 md:hidden">
+                        <ul className="space-y-2">
+                            {LINKS.map(l => (
+                                <li key={l.label}><Link to={l.to} className="display block py-2 text-5xl">{l.label}</Link></li>
+                            ))}
+                        </ul>
+                        <div className="mt-10 grid gap-3 border-t hairline pt-8">
+                            {!user && <Link to="/login" className="btn btn-primary">Sign in</Link>}
+                            <button type="button" className="btn btn-ghost" onClick={() => { setMenuOpen(false); setSearchOpen(true); }}>Search</button>
+                        </div>
+                    </div>
+                )}
+            </header>
         </>
     );
 }
