@@ -6,16 +6,28 @@ import { DeleteIcon } from "./DeleteIcon";
 import { Toast } from "./ui/Toast";
 import { getUsers, createUser, deleteUser } from "../api/users";
 
-const ADD_USER_FIELDS = ["Name", "Email", "Password", "User-Role"];
+// Passwords are managed by Firebase Auth and are never collected or stored here.
+const ADD_USER_FIELDS = ["Name", "Email", "User-Role"];
+const ROLE_OPTIONS = ["user", "admin"];
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const INITIAL_USER = {
     createdAt: new Date(),
     name: "",
-    avatar: "https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/142.jpg",
-    password: "",
+    avatar: "",
     email: "",
-    "user-role": "",
+    "user-role": "user",
 };
+
+/** Only allow http(s) image URLs coming from the public API. */
+function safeImageUrl(url) {
+    try {
+        const u = new URL(url);
+        return ["https:", "http:"].includes(u.protocol) ? u.href : undefined;
+    } catch {
+        return undefined;
+    }
+}
 
 const columnHeader = [
     { name: "NAME", uid: "name" },
@@ -52,9 +64,15 @@ function ManageUsers() {
             }
         }
 
+        if (!EMAIL_RE.test(userToAdd.email.trim()) || !ROLE_OPTIONS.includes(userToAdd["user-role"])) {
+            setDisplayedMessage("Cannot be added — invalid email or role");
+            setNotif(true);
+            return;
+        }
+
         const res = await getUsers();
         const duplicate = res.data.find(u =>
-            u.name === userToAdd.name && u.email === userToAdd.email
+            u.email?.toLowerCase() === userToAdd.email.trim().toLowerCase()
         );
         if (duplicate) {
             setDisplayedMessage("Cannot be added — user already exists");
@@ -108,7 +126,7 @@ function ManageUsers() {
                                         <TableRow key={item.id}>
                                             <TableCell>
                                                 <User
-                                                    avatarProps={{ radius: "lg", src: item.avatar }}
+                                                    avatarProps={{ radius: "lg", src: safeImageUrl(item.avatar) }}
                                                     description={item.email}
                                                     name={item.name}
                                                 />
@@ -159,14 +177,27 @@ function ManageUsers() {
                                                 </label>
                                                 <div className="mt-2">
                                                     <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-white-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-gray-500 sm:max-w-md">
-                                                        <input
-                                                            type={["email", "password"].includes(field.toLowerCase()) ? field.toLowerCase() : "text"}
-                                                            name={field.toLowerCase()}
-                                                            id={field.toLowerCase()}
-                                                            onChange={handleDataChange}
-                                                            className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-white-900 placeholder:text-white-400 focus:ring-0 sm:text-sm sm:leading-6"
-                                                            required
-                                                        />
+                                                        {field === "User-Role" ? (
+                                                            <select
+                                                                name="user-role"
+                                                                id="user-role"
+                                                                value={userToAdd["user-role"]}
+                                                                onChange={handleDataChange}
+                                                                className="block flex-1 border-0 bg-transparent py-1.5 pl-1 sm:text-sm sm:leading-6"
+                                                            >
+                                                                {ROLE_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                                                            </select>
+                                                        ) : (
+                                                            <input
+                                                                type={field === "Email" ? "email" : "text"}
+                                                                name={field.toLowerCase()}
+                                                                id={field.toLowerCase()}
+                                                                onChange={handleDataChange}
+                                                                maxLength={120}
+                                                                className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-white-900 placeholder:text-white-400 focus:ring-0 sm:text-sm sm:leading-6"
+                                                                required
+                                                            />
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>

@@ -9,8 +9,9 @@ import {
 import { auth } from "../lib/firebase";
 import { Toast } from "./ui/Toast";
 
+const AUTH_DISABLED_MSG = "Sign-in is not configured in this environment.";
+
 function getFirebaseError(code) {
-    console.error("Firebase auth error code:", code);
     switch (code) {
         case "auth/user-not-found":
         case "auth/wrong-password":
@@ -21,7 +22,7 @@ function getFirebaseError(code) {
         case "auth/operation-not-allowed": return "Email/password sign-in is not enabled. Check Firebase console.";
         case "auth/network-request-failed":return "Network error. Check your connection.";
         case "auth/user-disabled":         return "This account has been disabled.";
-        default:                           return `Something went wrong (${code}). Please try again.`;
+        default:                           return "Something went wrong. Please try again.";
     }
 }
 
@@ -40,6 +41,7 @@ function Login() {
 
     async function handleSignIn(e) {
         e.preventDefault();
+        if (!auth) return showToast("Unavailable", AUTH_DISABLED_MSG);
         try {
             await signInWithEmailAndPassword(auth, email, password);
             navigate("/");
@@ -49,6 +51,7 @@ function Login() {
     }
 
     async function handleGoogleSignIn() {
+        if (!auth) return showToast("Unavailable", AUTH_DISABLED_MSG);
         try {
             const provider = new GoogleAuthProvider();
             provider.setCustomParameters({ prompt: "select_account" });
@@ -61,6 +64,7 @@ function Login() {
 
     async function handleForgotPassword(e) {
         e.preventDefault();
+        if (!auth) return showToast("Unavailable", AUTH_DISABLED_MSG);
         try {
             await sendPasswordResetEmail(auth, forgotEmail);
             setResetSent(true);

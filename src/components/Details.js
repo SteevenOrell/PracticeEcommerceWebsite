@@ -23,7 +23,7 @@ function Details() {
     const reviews = { href: '#', average: 4, totalCount: 117 };
 
     useEffect(() => {
-        if (id !== null && id > 0) {
+        if (/^\d{1,9}$/.test(id || "")) {
             getProduct(id)
                 .then(res => {
                     if (res.data !== null) {

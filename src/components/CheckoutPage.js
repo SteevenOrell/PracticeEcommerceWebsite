@@ -16,8 +16,13 @@ function CheckoutPage() {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
     }
 
+    // DEMO ONLY: no payment is processed and nothing is sent anywhere. Card fields are kept
+    // in memory only and wiped on submit. A real store must use a PCI-compliant hosted
+    // payment element (e.g. Stripe Elements/Checkout in test mode) instead of raw inputs.
     function handlePay(e) {
         e.preventDefault();
+        if (cartItems.length === 0) return;
+        setForm(f => ({ ...f, cardNumber: "", expiry: "", cvv: "" }));
         clearCart();
         setPaid(true);
     }
@@ -62,17 +67,19 @@ function CheckoutPage() {
 
                     <section className="CheckoutSection">
                         <h3>Payment</h3>
+                        <p role="note">Demo checkout — no payment is processed. Do not enter real card details; use 4242 4242 4242 4242.</p>
                         <input
                             name="cardNumber" value={form.cardNumber} onChange={handleChange}
-                            placeholder="Card number (1234 5678 9012 3456)" maxLength={19} required
+                            placeholder="4242 4242 4242 4242" maxLength={19} required
+                            autoComplete="off" inputMode="numeric" pattern="[0-9 ]{12,19}"
                         />
                         <div className="CheckoutRow">
-                            <input name="expiry" value={form.expiry} onChange={handleChange} placeholder="MM / YY" maxLength={7} required />
-                            <input name="cvv" value={form.cvv} onChange={handleChange} placeholder="CVV" maxLength={4} required />
+                            <input name="expiry" value={form.expiry} onChange={handleChange} placeholder="MM / YY" maxLength={7} required autoComplete="off" />
+                            <input name="cvv" value={form.cvv} onChange={handleChange} placeholder="CVV" maxLength={4} required autoComplete="off" inputMode="numeric" pattern="[0-9]{3,4}" />
                         </div>
                     </section>
 
-                    <button type="submit" id="PayNowBtn">
+                    <button type="submit" id="PayNowBtn" disabled={cartItems.length === 0}>
                         Pay ${cartTotal.toFixed(2)}
                     </button>
                 </form>

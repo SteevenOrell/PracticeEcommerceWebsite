@@ -17,7 +17,7 @@ function Footer(){
                     <ul className="text-lg flex items-center justify-center flex-col gap-7 md:flex-row md:gap-12 transition-all duration-500 py-16 mb-10 border-b border-gray-200">
                         <li><Link to="/" href="#" className="text-white-800 hover:text-gray-300">Home</Link></li>
                         <li><Link to='/products' className=" text-white-800 hover:text-gray-300">Products</Link></li>
-                        <li><a href="https://steeven-wemin-portfolio.vercel.app/" className=" text-white-800 hover:text-gray-300">About</a></li>
+                        <li><a href="https://steeven-wemin-portfolio.vercel.app/" target="_blank" rel="noopener noreferrer" className=" text-white-800 hover:text-gray-300">About</a></li>
                         
                         
                     </ul>
@@ -47,7 +47,7 @@ function Footer(){
                                 
                         </a>
                     </div>
-                    <span className="text-lg text-gray-400 text-center block">©<a href="www.linkedin.com/in/orell-wemin-8519a5179">Steeven Wemin</a> {new Date().getFullYear}, All rights reserved.</span>
+                    <span className="text-lg text-gray-400 text-center block">©<a href="https://www.linkedin.com/in/orell-wemin-8519a5179" target="_blank" rel="noopener noreferrer">Steeven Wemin</a> {new Date().getFullYear()}, All rights reserved.</span>
             </div>
         </div>
     </footer> )

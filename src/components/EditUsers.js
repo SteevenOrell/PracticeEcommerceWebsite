@@ -3,7 +3,8 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { Toast } from "./ui/Toast";
 import { getUsers, getUser, updateUser } from "../api/users";
 
-const PROFILE_FIELDS = [["User-Role", ""], ["Name", ""], ["Email", "@"], ["Password", "*"]];
+// Passwords live in Firebase Auth only; they are never edited through the public users API.
+const PROFILE_FIELDS = [["User-Role", ""], ["Name", ""], ["Email", "@"]];
 
 function EditUsers() {
     const { id } = useParams();
@@ -13,7 +14,7 @@ function EditUsers() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (id.length > 0) {
+        if (/^[A-Za-z0-9_-]{1,64}$/.test(id || "")) {
             getUser(id)
                 .then(res => {
                     if (res.data !== null) setDataOtherUser(res.data);
@@ -36,13 +37,11 @@ function EditUsers() {
 
         const res = await getUsers();
         const duplicate = res.data.find(u =>
-            u.name === otherUser.name &&
-            u.email === otherUser.email &&
-            u.password === otherUser.password &&
+            u.email?.toLowerCase() === otherUser.email?.trim().toLowerCase() &&
             u.id !== otherUser.id
         );
         if (duplicate) {
-            setDisplayedMessage("Unsuccessful — user already exists with the same credentials");
+            setDisplayedMessage("Unsuccessful — another user already uses this email");
             setNotif(true);
             return;
         }
@@ -85,7 +84,7 @@ function EditUsers() {
                                         <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-white-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-gray-500 sm:max-w-md">
                                             <span className="flex select-none items-center pl-3 text-white-500 sm:text-sm">{field[1]}</span>
                                             <input
-                                                type={["email", "password"].includes(field[0].toLowerCase()) ? field[0].toLowerCase() : "text"}
+                                                type={field[0] === "Email" ? "email" : "text"}
                                                 name={field[0].toLowerCase()}
                                                 id={field[0].toLowerCase()}
                                                 onChange={handleDataChange}

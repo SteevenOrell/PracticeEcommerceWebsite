@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Axios from 'axios';
+import { getProducts } from '../api/products';
 import { getProductImage } from '../utils/getProductImage';
 import mainVid1 from '../assets/athlete-black-man-and-tying-shoes-in-city-for-get-2025-12-18-01-49-15-utc2_compressed.mp4';
 import mainVid1Mobile from '../assets/athlete-black-man-and-tying-shoes-on-road-for-get-2025-12-18-02-04-06-utc_compressed.mov';
@@ -16,10 +16,11 @@ function MainPage() {
     const [isPaused, setIsPaused] = useState(false);
 
     useEffect(() => {
-        Axios.get('https://6648f7ef4032b1331becf0f2.mockapi.io/products')
+        getProducts()
             .then(res => {
                 if (res.data.length > 0) setProducts(res.data.slice(0, 10));
-            });
+            })
+            .catch(() => setProducts([]));
     }, []);
 
     return (

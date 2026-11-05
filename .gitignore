@@ -25,3 +25,8 @@ yarn-error.log*
 
 # backup files
 *.bak
+
+# env files (never commit real values; see .env.example)
+.env.*
+!.env.example
+*.pem
