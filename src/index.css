@@ -334,3 +334,14 @@ details.accordion .accordion-body { padding-bottom: 1.4rem; color: #d4d4cf; line
 .site-footer { border-top: 1px solid var(--line); margin-top: auto; }
 .footer-wordmark { font-family: Anton, Impact, sans-serif; text-transform: uppercase; font-size: clamp(3.5rem, 15vw, 15rem); line-height: .82; letter-spacing: -0.01em; color: #1f1f1f; user-select: none; }
 } /* end @layer components */
+
+/* ---------- Very small screens (< 250px) ----------
+   Same rule as the portfolio: below 250px the layout is locked at 500px so text and
+   blocks keep their proportions instead of collapsing; visitors pan or zoom out. */
+@media (max-width: 250px) {
+  #root, .mobile-menu, #SearchOverlay, #SearchBackdrop, #CartSidebarBackdrop { width: 500px; }
+  #CartSidebar { width: 440px; left: 0; right: auto; }
+  .mobile-menu, #SearchOverlay, #SearchBackdrop, #CartSidebarBackdrop { right: auto; }
+  .toast { width: 380px; }
+  html { overflow-x: auto; }
+}
