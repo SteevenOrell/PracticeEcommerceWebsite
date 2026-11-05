@@ -92,11 +92,17 @@ browser bundle, so never put secrets in them. See [SECURITY.md](SECURITY.md) for
 
 ---
 
-## Test Account
+## Trying the demo
 
-| Field | Value |
-|---|---|
-| Email | test@gmail.com |
-| Password | test123 |
+There is no shared test account. Two levels of access are available:
 
-> Contact me on LinkedIn to test admin features.
+| Access | How to get it | What you can do |
+|---|---|---|
+| **Guest** | Just open the [live site](https://ecom-web-practice.vercel.app/) | Browse products, search, filter, add to cart, and walk through the demo checkout |
+| **Standard member** | On the sign-in page, choose **Continue with Google** | Everything a guest can do, plus the account menu and your own profile name/avatar. Members can't create, edit or delete products or users. |
+| **Admin** | Contact me on LinkedIn and I'll grant access to your account | The user management screens (view, add, edit and delete demo users) |
+
+**Please note:**
+- All products and users are fake demo data. The checkout is a demo: **never enter a real card number**.
+- Your Google name, email and photo are used only to show your account in the app's menu. They aren't written to the demo API.
+- The demo data may be reset from time to time.

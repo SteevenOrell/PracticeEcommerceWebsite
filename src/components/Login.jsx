@@ -115,6 +115,9 @@ function Login() {
                         <>
                             <p className="eyebrow">Welcome back</p>
                             <h1 className="display-lg mt-3">Sign in</h1>
+                            <p className="muted mt-4 text-sm" role="note">
+                                Trying the demo? Continue with Google to explore as a standard member. Admin access is available on request.
+                            </p>
                             <form className="mt-8 space-y-5" onSubmit={handleSignIn}>
                                 <div className="field">
                                     <label htmlFor="email">Email address</label>
