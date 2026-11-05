@@ -84,6 +84,17 @@ for (const [vp, size] of Object.entries(viewports)) {
   await clientNav(page, "/cart"); await shot(page, "04-cart", vp);
   await clientNav(page, "/checkout"); await shot(page, "05-checkout", vp);
   await page.goto(baseURL + "/login"); await settle(page); await shot(page, "06-login", vp);
+  await page.goto(baseURL + "/products?purpose=Apparel"); await settle(page); await shot(page, "07-apparel-listing", vp);
+  await page.goto(baseURL + "/details/21"); await settle(page); await shot(page, "08-apparel-detail", vp);
+  const menuBtn = page.locator('button[aria-controls="mobile-menu"]');
+  if (vp === "mobile" && await menuBtn.isVisible()) {
+    await page.goto(baseURL + "/"); await settle(page, 1500);
+    await menuBtn.click(); await page.waitForTimeout(600);
+    const file = path.join(outDir, `${label}-${vp}-09-menu.png`);
+    await page.screenshot({ path: file });
+    note(`saved ${file}`);
+    await closeOverlays(page);
+  }
   await page.goto(baseURL + "/manage-users"); await settle(page);
   note(`[${vp}] /manage-users without auth resolved to ${new URL(page.url()).pathname}`);
   await ctx.close();
@@ -96,10 +107,16 @@ if (withVideo) {
     const page = await ctx.newPage();
     const smooth = async (px, steps = 12) => { for (let i = 0; i < steps; i++) { await page.mouse.wheel(0, px / steps); await page.waitForTimeout(90); } };
     await page.goto(baseURL + "/"); await settle(page, 2500);
+    const vMenu = page.locator('button[aria-controls="mobile-menu"]');
+    if (await vMenu.isVisible()) { await vMenu.click(); await page.waitForTimeout(1500); await vMenu.click(); await page.waitForTimeout(500); }
     for (let i = 0; i < 6; i++) await smooth(700);
     await page.waitForTimeout(800);
+    await page.goto(baseURL + "/products?purpose=Apparel"); await settle(page, 1200);
+    await smooth(900); await page.waitForTimeout(800);
     await page.goto(baseURL + "/products"); await settle(page, 1200);
     await smooth(900); await page.waitForTimeout(600);
+    const next = page.locator('li[aria-label="next page button"]');
+    if (await next.count()) { await smooth(2500); await next.click(); await page.waitForTimeout(1500); }
     const card = page.locator('a[href^="/details/"]').first();
     if (await card.count()) { await card.click(); await settle(page, 1200); } else { await page.goto(baseURL + "/details/1"); await settle(page); }
     await smooth(500); await page.waitForTimeout(500);
