@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { CartContext } from "./CartContextComponent";
-import { getProductImage } from "../utils/getProductImage";
+import { getImageFor } from "../utils/getProductImage";
 import { formatPrice } from "../utils/format";
 
 const EMPTY_FORM = {
@@ -116,7 +116,7 @@ function CheckoutPage() {
                                 {cartItems.map(item => (
                                     <li key={item.id} className="flex items-center gap-4 border-b hairline py-4">
                                         <div className="line-item-img h-16 w-16 flex-shrink-0">
-                                            <img src={getProductImage(item["image-folder-name"])} alt="" />
+                                            <img src={getImageFor(item, 1, 300)} alt="" />
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <p className="truncate text-sm font-semibold">{item["article-name"]}</p>

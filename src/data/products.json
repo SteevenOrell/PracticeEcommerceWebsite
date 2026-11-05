@@ -236,5 +236,227 @@
     "purpose": "Lifestyle",
     "image-folder-name": "AirForce-LouisVuitton",
     "id": "17"
+  },
+  {
+    "created-at": "2026-11-05T09:00:00.000Z",
+    "article-name": "Core Pullover Hoodie",
+    "category": "clothing",
+    "color": "Black",
+    "description": "A heavyweight 400gsm brushed-fleece hoodie with a double-layer hood, dropped shoulders and a kangaroo pocket. Garment-dyed for a soft, lived-in hand from day one.",
+    "gender": "unisex",
+    "price": 89,
+    "quantity": 40,
+    "size": "M",
+    "purpose": "Apparel",
+    "images": [
+      "https://images.unsplash.com/photo-1746971054333-8b9610b397a5"
+    ],
+    "image-credits": [
+      "prokhorov"
+    ],
+    "id": "18"
+  },
+  {
+    "created-at": "2026-11-05T09:00:00.000Z",
+    "article-name": "Essential Heavy Tee",
+    "category": "clothing",
+    "color": "White",
+    "description": "Our everyday tee in dense 240gsm combed cotton. Boxy fit, ribbed collar that holds its shape, and side seams that stay put wash after wash.",
+    "gender": "unisex",
+    "price": 42,
+    "quantity": 80,
+    "size": "L",
+    "purpose": "Apparel",
+    "images": [
+      "https://images.unsplash.com/photo-1778671394516-8270eac13c42",
+      "https://images.unsplash.com/photo-1651761179569-4ba2aa054997"
+    ],
+    "image-credits": [
+      "avtar9w",
+      "mockupbee"
+    ],
+    "id": "19"
+  },
+  {
+    "created-at": "2026-11-05T09:00:00.000Z",
+    "article-name": "Essential Heavy Tee",
+    "category": "clothing",
+    "color": "Black",
+    "description": "The same heavyweight tee in a deep, fade-resistant black. Slightly cropped body that sits clean over a waistband.",
+    "gender": "unisex",
+    "price": 42,
+    "quantity": 75,
+    "size": "M",
+    "purpose": "Apparel",
+    "images": [
+      "https://images.unsplash.com/photo-1571455786673-9d9d6c194f90",
+      "https://images.unsplash.com/photo-1726140872004-850c80900ae3"
+    ],
+    "image-credits": [
+      "jibarox",
+      "bernhardvisuals"
+    ],
+    "id": "20"
+  },
+  {
+    "created-at": "2026-11-05T09:00:00.000Z",
+    "article-name": "Retro Track Jacket",
+    "category": "clothing",
+    "color": "Red/White",
+    "description": "A lightweight tricot track jacket with contrast side stripes, a stand collar and a full-length zip. Built for warm-ups, worn everywhere else.",
+    "gender": "unisex",
+    "price": 129,
+    "quantity": 25,
+    "size": "L",
+    "purpose": "Apparel",
+    "images": [
+      "https://images.unsplash.com/photo-1643622782660-30dedcd8d75a",
+      "https://images.unsplash.com/photo-1586360727847-108cbb274ad1"
+    ],
+    "image-credits": [
+      "rezziizz",
+      "filipbaotic"
+    ],
+    "id": "21"
+  },
+  {
+    "created-at": "2026-11-05T09:00:00.000Z",
+    "article-name": "Fleece Jogger",
+    "category": "clothing",
+    "color": "Heather Grey",
+    "description": "Tapered joggers in loopback fleece with an elastic waistband, adjustable drawcord and ribbed cuffs. Deep pockets keep your phone where it belongs.",
+    "gender": "unisex",
+    "price": 79,
+    "quantity": 50,
+    "size": "M",
+    "purpose": "Apparel",
+    "images": [
+      "https://images.unsplash.com/photo-1602573991155-21f0143bb45c"
+    ],
+    "image-credits": [
+      "enginakyurt"
+    ],
+    "id": "22"
+  },
+  {
+    "created-at": "2026-11-05T09:00:00.000Z",
+    "article-name": "Gloss Puffer Jacket",
+    "category": "clothing",
+    "color": "Black",
+    "description": "A high-shine puffer with recycled synthetic fill, a stand-up collar and baffled channels for even warmth. Water-resistant shell for city winters.",
+    "gender": "unisex",
+    "price": 249,
+    "quantity": 15,
+    "size": "L",
+    "purpose": "Apparel",
+    "images": [
+      "https://images.unsplash.com/photo-1769689388217-c3c8fec7099d",
+      "https://images.unsplash.com/photo-1769689387719-f11faac08cbe"
+    ],
+    "image-credits": [
+      "metujiiiiiiin"
+    ],
+    "id": "23"
+  },
+  {
+    "created-at": "2026-11-05T09:00:00.000Z",
+    "article-name": "Cloud Puffer Jacket",
+    "category": "clothing",
+    "color": "Ivory",
+    "description": "An oversized, cropped puffer in a soft matte ivory. Lofty insulation, two-way zip and an inner storm placket keep the cold out.",
+    "gender": "unisex",
+    "price": 249,
+    "quantity": 12,
+    "size": "S",
+    "purpose": "Apparel",
+    "images": [
+      "https://images.unsplash.com/photo-1706765779494-2705542ebe74",
+      "https://images.unsplash.com/photo-1678884399113-0a2b079a31f5"
+    ],
+    "image-credits": [
+      "cgxlmedia",
+      "caarl"
+    ],
+    "id": "24"
+  },
+  {
+    "created-at": "2026-11-05T09:00:00.000Z",
+    "article-name": "Heavyweight Crewneck",
+    "category": "clothing",
+    "color": "Rust",
+    "description": "A structured crewneck in brushed-back fleece with ribbed trims and a relaxed fit. Rich rust colourway that pairs with everything in the drop.",
+    "gender": "unisex",
+    "price": 95,
+    "quantity": 30,
+    "size": "M",
+    "purpose": "Apparel",
+    "images": [
+      "https://images.unsplash.com/photo-1578587018452-892bacefd3f2",
+      "https://images.unsplash.com/photo-1607160199580-1b0c9b736b66"
+    ],
+    "image-credits": [
+      "matuxee",
+      "darkandflawed"
+    ],
+    "id": "25"
+  },
+  {
+    "created-at": "2026-11-05T09:00:00.000Z",
+    "article-name": "Six-Panel Cap",
+    "category": "clothing",
+    "color": "White",
+    "description": "A low-profile six-panel cap in brushed cotton twill with a pre-curved brim and an adjustable strap. One size fits most.",
+    "gender": "unisex",
+    "price": 35,
+    "quantity": 100,
+    "size": "OS",
+    "purpose": "Apparel",
+    "images": [
+      "https://images.unsplash.com/photo-1691256676359-20e5c6d4bc92",
+      "https://images.unsplash.com/photo-1588850561407-ed78c282e89b"
+    ],
+    "image-credits": [
+      "personal_graphic",
+      "mediamodifier"
+    ],
+    "id": "26"
+  },
+  {
+    "created-at": "2026-11-05T09:00:00.000Z",
+    "article-name": "Washed Dad Cap",
+    "category": "clothing",
+    "color": "Charcoal",
+    "description": "An unstructured, garment-washed cap with a soft crown and a slightly faded finish. Brass buckle closure. One size fits most.",
+    "gender": "unisex",
+    "price": 32,
+    "quantity": 60,
+    "size": "OS",
+    "purpose": "Apparel",
+    "images": [
+      "https://images.unsplash.com/photo-1521369909029-2afed882baee"
+    ],
+    "image-credits": [
+      "palon"
+    ],
+    "id": "27"
+  },
+  {
+    "created-at": "2026-11-05T09:00:00.000Z",
+    "article-name": "Chunky Knit Beanie",
+    "category": "clothing",
+    "color": "Mustard",
+    "description": "A cable-knit beanie in a soft wool blend with a fold-over cuff. Warm without the itch. One size fits most.",
+    "gender": "unisex",
+    "price": 29,
+    "quantity": 70,
+    "size": "OS",
+    "purpose": "Apparel",
+    "images": [
+      "https://images.unsplash.com/photo-1576529598261-96e376f6aabb"
+    ],
+    "image-credits": [
+      "kerimayar"
+    ],
+    "id": "28"
   }
 ]

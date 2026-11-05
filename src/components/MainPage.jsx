@@ -18,7 +18,8 @@ const MARQUEE = ["New season drops", "Free shipping on every order", "Limited pa
 const CATEGORIES = [
     { label: "Lifestyle", to: "/products?purpose=Lifestyle", folder: "Jordan4RetroOffWhiteSail", blurb: "Everyday icons" },
     { label: "Football", to: "/products?purpose=Football", folder: "MercurialSuperfly7EliteSEFGLaserOrange", blurb: "Built for speed" },
-    { label: "All shoes", to: "/products", folder: "YeezyBoost700V2Cream", blurb: "The full edit" },
+    { label: "Apparel", to: "/products?purpose=Apparel", src: "https://images.unsplash.com/photo-1746971054333-8b9610b397a5?w=900&q=80&auto=format&fit=crop", blurb: "Layers for the street" },
+    { label: "All products", to: "/products", folder: "YeezyBoost700V2Cream", blurb: "The full edit" },
 ];
 
 function useIsMobile(query = "(max-width: 768px)") {
@@ -219,12 +220,12 @@ function Categories() {
                 <p className="eyebrow">Shop by</p>
                 <h2 id="cat-title" className="display-md mt-3">Category</h2>
             </Reveal>
-            <ul className="mt-10 grid gap-6 md:grid-cols-3">
+            <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {CATEGORIES.map((c, i) => (
                     <Reveal as="li" key={c.label} delay={i * 0.08}>
                         <Link to={c.to} className="group block">
-                            <div className="media-tile aspect-[4/5] !bg-[var(--tile)]">
-                                <img src={getProductImage(c.folder, 1)} alt="" loading="lazy" />
+                            <div className={`media-tile aspect-[4/5] ${c.src ? "" : "!bg-[var(--tile)]"}`}>
+                                <img src={c.src || getProductImage(c.folder, 1)} alt="" loading="lazy" className={c.src ? "object-cover" : ""} />
                             </div>
                             <div className="media-caption">
                                 <span className="display text-3xl">{c.label}</span>

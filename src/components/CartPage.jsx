@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CartContext } from "./CartContextComponent";
 import { QuantitySelector } from "./ui/QuantitySelector";
-import { getProductImage } from "../utils/getProductImage";
+import { getImageFor } from "../utils/getProductImage";
 import { formatPrice } from "../utils/format";
 
 function CartPage() {
@@ -26,7 +26,7 @@ function CartPage() {
                         {cartItems.map(item => (
                             <li className="line-item lg" key={item.id}>
                                 <Link to={`/details/${encodeURIComponent(item.id)}`} className="line-item-img" aria-label={`View ${item["article-name"]}`}>
-                                    <img src={getProductImage(item["image-folder-name"])} alt="" />
+                                    <img src={getImageFor(item, 1, 300)} alt="" />
                                 </Link>
                                 <div className="min-w-0">
                                     <p className="text-lg font-semibold">{item["article-name"]}</p>

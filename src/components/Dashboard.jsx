@@ -42,7 +42,13 @@ function Dashboard() {
 
     const purposes = useMemo(() => [...new Set(products.map(p => p.purpose).filter(Boolean))], [products]);
     const colors = useMemo(() => [...new Set(products.map(p => p.color).filter(Boolean))], [products]);
-    const sizes = useMemo(() => [...new Set(products.map(p => p.size).filter(Boolean))].sort((a, b) => a - b), [products]);
+    // Shoe sizes (numbers) first in numeric order, then apparel sizes (XS…XXL) in fit order.
+    const sizes = useMemo(() => {
+        const ORDER = ["XS", "S", "M", "L", "XL", "XXL", "OS"];
+        const rank = (s) => typeof s === "number" ? s : 1000 + (ORDER.indexOf(String(s)) + 1 || 99);
+        const pool = products.filter(p => purpose === "all" || p.purpose === purpose);
+        return [...new Set(pool.map(p => p.size).filter(s => s !== undefined && s !== null && s !== ""))].sort((a, b) => rank(a) - rank(b));
+    }, [products, purpose]);
 
     const filtered = useMemo(() => {
         const q = searchData.trim().toLowerCase();
@@ -58,7 +64,7 @@ function Dashboard() {
     const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
     const displayed = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
     const activeFilters = (filterColor !== "all") + (filterSize !== "all");
-    const title = purpose === "all" ? "All shoes" : purpose;
+    const title = purpose === "all" ? "All products" : purpose;
 
     function setPurpose(value) {
         const next = new URLSearchParams(params);
@@ -124,7 +130,7 @@ function Dashboard() {
                                     )}
                                     {sizes.length > 0 && (
                                         <fieldset className="FilterDropdownGroup">
-                                            <legend className="FilterDropdownLabel eyebrow">Size (US)</legend>
+                                            <legend className="FilterDropdownLabel eyebrow">Size</legend>
                                             <div className="FilterDropdownOptions">
                                                 {sizes.map(size => (
                                                     <button key={size} type="button" className="chip !min-h-[34px] !text-xs" aria-pressed={filterSize === String(size)}

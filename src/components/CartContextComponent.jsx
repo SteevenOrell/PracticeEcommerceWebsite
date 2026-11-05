@@ -10,7 +10,7 @@ export const CartContext = createContext({
 const STORAGE_KEY = "cv-cart-v1";
 const MAX_QTY = 10;
 // Only non-sensitive catalogue fields are persisted (no user data).
-const CART_FIELDS = ["id", "article-name", "price", "color", "size", "purpose", "image-folder-name"];
+const CART_FIELDS = ["id", "article-name", "price", "color", "size", "purpose", "image-folder-name", "images", "category"];
 
 function pick(product) {
     const out = {};

@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { StarIcon } from "@heroicons/react/20/solid";
 import { CartContext } from "./CartContextComponent";
 import { getProduct } from "../api/products";
-import { getProductImages } from "../utils/getProductImage";
+import { getImagesFor } from "../utils/getProductImage";
 import { formatPrice } from "../utils/format";
 import { useProducts } from "../hooks/useProducts";
 import { QuantitySelector } from "./ui/QuantitySelector";
@@ -95,13 +95,14 @@ function Details() {
             <main id="main" className="container-x py-32 text-center">
                 <h1 className="display-lg">{status === "notfound" ? "Product not found" : "Something went wrong"}</h1>
                 <p className="muted mt-4">{status === "notfound" ? "This product doesn't exist or is no longer available." : "We couldn't load this product. Please try again."}</p>
-                <Link to="/products" className="btn btn-primary mt-8">Browse all shoes</Link>
+                <Link to="/products" className="btn btn-primary mt-8">Browse all products</Link>
             </main>
         );
     }
 
     const name = product["article-name"];
-    const images = getProductImages(product["image-folder-name"]);
+    const images = getImagesFor(product);
+    const isApparel = product.purpose === "Apparel";
     const related = products.filter(p => p.id !== product.id && p.purpose === product.purpose).slice(0, 8);
 
     function handleAdd(e) {
@@ -153,11 +154,11 @@ function Details() {
                             </div>
 
                             <fieldset>
-                                <legend className="text-sm font-semibold">Size (US)</legend>
+                                <legend className="text-sm font-semibold">{isApparel ? "Size" : "Size (US)"}</legend>
                                 <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label="Size">
                                     <button type="button" role="radio" aria-checked="true" className="size-pill">{product.size}</button>
                                 </div>
-                                <p className="mt-2 text-xs muted">Only one size is in stock for this pair.</p>
+                                <p className="mt-2 text-xs muted">Only one size is in stock for this {isApparel ? "item" : "pair"}.</p>
                             </fieldset>
 
                             <div className="flex flex-wrap items-center gap-4">
@@ -166,6 +167,16 @@ function Details() {
                             </div>
                             <p className="text-sm muted" role="status" aria-live="polite">{added ? `${name} added to your bag.` : ""}</p>
                         </form>
+
+                        {Array.isArray(product["image-credits"]) && product["image-credits"].length > 0 && (
+                            <p className="mt-4 text-xs muted">
+                                Photos:{" "}
+                                {product["image-credits"].map((c, i) => (
+                                    <span key={c}>{i > 0 && ", "}<a className="link-underline" href={`https://unsplash.com/@${encodeURIComponent(c)}?utm_source=clodio_vendem_demo&utm_medium=referral`} target="_blank" rel="noopener noreferrer">@{c}</a></span>
+                                ))}{" "}
+                                on <a className="link-underline" href="https://unsplash.com/?utm_source=clodio_vendem_demo&utm_medium=referral" target="_blank" rel="noopener noreferrer">Unsplash</a>
+                            </p>
+                        )}
 
                         <div className="mt-6">
                             <details className="accordion" open>

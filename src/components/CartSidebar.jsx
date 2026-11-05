@@ -2,7 +2,7 @@ import { useContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "./CartContextComponent";
 import { QuantitySelector } from "./ui/QuantitySelector";
-import { getProductImage } from "../utils/getProductImage";
+import { getImageFor } from "../utils/getProductImage";
 import { formatPrice } from "../utils/format";
 
 function CartSidebar() {
@@ -68,7 +68,7 @@ function CartSidebar() {
                             {cartItems.map(item => (
                                 <li className="line-item" key={item.id}>
                                     <div className="line-item-img">
-                                        <img src={getProductImage(item["image-folder-name"])} alt="" />
+                                        <img src={getImageFor(item, 1, 300)} alt="" />
                                     </div>
                                     <div className="min-w-0">
                                         <p className="font-semibold leading-snug">{item["article-name"]}</p>

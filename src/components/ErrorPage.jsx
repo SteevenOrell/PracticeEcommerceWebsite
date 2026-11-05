@@ -9,7 +9,7 @@ function ErrorPage() {
                 <p className="muted mx-auto mt-6 max-w-md">We couldn't find the page you're looking for. It may have moved, or the link may be wrong.</p>
                 <div className="mt-10 flex flex-wrap justify-center gap-3">
                     <Link to="/" className="btn btn-primary">Go home</Link>
-                    <Link to="/products" className="btn btn-ghost">Shop all shoes</Link>
+                    <Link to="/products" className="btn btn-ghost">Shop all products</Link>
                 </div>
             </div>
         </main>

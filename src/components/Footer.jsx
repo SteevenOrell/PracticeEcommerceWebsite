@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 
 const SHOP = [
-    { label: "All shoes", to: "/products" },
+    { label: "All products", to: "/products" },
+    { label: "Apparel", to: "/products?purpose=Apparel" },
     { label: "Lifestyle", to: "/products?purpose=Lifestyle" },
     { label: "Football", to: "/products?purpose=Football" },
 ];

@@ -50,6 +50,17 @@ describe("products", () => {
         await assertSucceeds(updateDoc(doc(admin(), "products/1"), { price: 99 }));
         await assertSucceeds(deleteDoc(doc(admin(), "products/1")));
     });
+    it("admins can write apparel with letter sizes and https images", async () => {
+        await assertSucceeds(setDoc(doc(admin(), "products/30"), {
+            ...product, id: "30", size: "XL", purpose: "Apparel",
+            images: ["https://images.unsplash.com/photo-1", "https://images.unsplash.com/photo-2"], "image-credits": ["someone"],
+        }));
+    });
+    it("rejects non-https images and odd sizes", async () => {
+        await assertFails(setDoc(doc(admin(), "products/31"), { ...product, images: ["http://x.test/a.png"] }));
+        await assertFails(setDoc(doc(admin(), "products/31"), { ...product, images: ["https://ok.test/a.png", "javascript:alert(1)"] }));
+        await assertFails(setDoc(doc(admin(), "products/31"), { ...product, size: "<b>" }));
+    });
     it("even admins cannot write malformed products", async () => {
         await assertFails(updateDoc(doc(admin(), "products/1"), { price: "free" }));
         await assertFails(updateDoc(doc(admin(), "products/1"), { "image-folder-name": "../../x" }));

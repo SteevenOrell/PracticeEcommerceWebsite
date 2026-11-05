@@ -22,3 +22,36 @@ export function getProductImages(folderName, max = 8) {
     }
     return out;
 }
+
+// Remote images (e.g. Unsplash photos for apparel) are stored as base https URLs on the
+// product's `images` field. Only https is accepted; Unsplash URLs get a sized, compressed variant.
+function sizedRemote(url, width) {
+    try {
+        const u = new URL(url);
+        if (u.protocol !== "https:") return null;
+        if (u.hostname === "images.unsplash.com") {
+            u.search = "";
+            u.searchParams.set("w", String(width));
+            u.searchParams.set("q", "80");
+            u.searchParams.set("auto", "format");
+            u.searchParams.set("fit", "crop");
+        }
+        return u.href;
+    } catch {
+        return null;
+    }
+}
+
+/** Every image for a product: remote `images` first, else the bundled image folder. */
+export function getImagesFor(product, { width = 1200, max = 8 } = {}) {
+    if (!product) return [];
+    if (Array.isArray(product.images) && product.images.length) {
+        return product.images.map(src => sizedRemote(src, width)).filter(Boolean).slice(0, max);
+    }
+    return getProductImages(product["image-folder-name"], max);
+}
+
+/** The nth (1-based) image for a product, or null. */
+export function getImageFor(product, index = 1, width = 800) {
+    return getImagesFor(product, { width, max: index })[index - 1] ?? null;
+}

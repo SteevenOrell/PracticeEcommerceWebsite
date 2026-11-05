@@ -7,13 +7,14 @@ import { UserContext } from "./UserContextComponent";
 import { SearchContext } from "./SearchDataComponent";
 import { CartContext } from "./CartContextComponent";
 import { useProducts } from "../hooks/useProducts";
-import { getProductImage } from "../utils/getProductImage";
+import { getImageFor } from "../utils/getProductImage";
 import { formatPrice } from "../utils/format";
 
 const LINKS = [
     { label: "New & Featured", to: "/products" },
     { label: "Lifestyle", to: "/products?purpose=Lifestyle" },
     { label: "Football", to: "/products?purpose=Football" },
+    { label: "Apparel", to: "/products?purpose=Apparel" },
 ];
 
 function safeImageUrl(url) {
@@ -56,7 +57,7 @@ function SearchOverlay({ onClose }) {
                         <SearchIcon size={20} />
                         <input
                             id="site-search" ref={inputRef} type="search" value={query} onChange={e => setQuery(e.target.value)}
-                            placeholder="Search shoes" autoComplete="off" maxLength={80}
+                            placeholder="Search shoes and apparel" autoComplete="off" maxLength={80}
                             className="h-full flex-1 bg-transparent text-base outline-none placeholder:text-white/50"
                         />
                     </div>
@@ -69,7 +70,7 @@ function SearchOverlay({ onClose }) {
                         <div>
                             <p className="eyebrow">Popular searches</p>
                             <div className="mt-3 flex flex-wrap gap-2">
-                                {["Jordan", "Yeezy", "Mercurial", "Dunk"].map(t => (
+                                {["Jordan", "Hoodie", "Mercurial", "Puffer", "Dunk"].map(t => (
                                     <button key={t} type="button" className="chip" onClick={() => setQuery(t)}>{t}</button>
                                 ))}
                             </div>
@@ -80,7 +81,7 @@ function SearchOverlay({ onClose }) {
                             {results.map(p => (
                                 <li key={p.id}>
                                     <Link to={`/details/${encodeURIComponent(p.id)}`} onClick={onClose} className="product-card">
-                                        <div className="product-card-media"><img className="primary" src={getProductImage(p["image-folder-name"])} alt="" /></div>
+                                        <div className="product-card-media"><img className="primary" src={getImageFor(p, 1, 400)} alt="" /></div>
                                         <div className="product-card-body">
                                             <p className="product-card-name">{p["article-name"]}</p>
                                             <p className="product-card-price">{formatPrice(p.price)}</p>
@@ -140,7 +141,7 @@ function Navigation() {
                         </ul>
                     </div>
 
-                    <Link to="/" aria-label="Clodio Vendem home" className="justify-self-center"><AcmeLogo /></Link>
+                    <Link to="/" aria-label="Clodio Vendem home" className="flex items-center justify-self-center py-2"><AcmeLogo height={32} /></Link>
 
                     <div className="flex items-center justify-end gap-1">
                         <button type="button" className="icon-btn sm:!w-auto sm:gap-2 sm:rounded-full sm:bg-white/10 sm:px-4" onClick={() => setSearchOpen(true)} aria-label="Search products">

@@ -23,11 +23,20 @@ service cloud.firestore {
 
     function validProduct(d) {
       return d.keys().hasOnly(['article-name', 'category', 'color', 'created-at', 'description',
-                               'gender', 'id', 'image-folder-name', 'price', 'purpose', 'quantity', 'size'])
+                               'gender', 'id', 'image-folder-name', 'images', 'image-credits',
+                               'price', 'purpose', 'quantity', 'size'])
         && isShortString(d['article-name'], 120)
         && d.price is number && d.price >= 0 && d.price < 100000
         && (!('quantity' in d) || (d.quantity is int && d.quantity >= 0))
-        && (!('size' in d) || d.size is number)
+        // Shoe sizes are numbers (9.5); apparel sizes are short labels (S, M, XL, OS).
+        && (!('size' in d) || d.size is number || (d.size is string && d.size.matches('^[A-Z]{1,4}$')))
+        // Remote images: up to 8 https URLs. The client also filters to https before rendering.
+        && (!('images' in d) || (d.images is list && d.images.size() <= 8
+            && (d.images.size() < 1 || (d.images[0] is string && d.images[0].matches('^https://[^\\s]{1,500}$')))
+            && (d.images.size() < 2 || (d.images[1] is string && d.images[1].matches('^https://[^\\s]{1,500}$')))
+            && (d.images.size() < 3 || (d.images[2] is string && d.images[2].matches('^https://[^\\s]{1,500}$')))
+            && (d.images.size() < 4 || (d.images[3] is string && d.images[3].matches('^https://[^\\s]{1,500}$')))))
+        && (!('image-credits' in d) || (d['image-credits'] is list && d['image-credits'].size() <= 8))
         && (!('image-folder-name' in d) || d['image-folder-name'].matches('^[A-Za-z0-9_-]{1,64}$'))
         && optionalString(d, 'description', 2000)
         && optionalString(d, 'category', 60)

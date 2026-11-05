@@ -15,7 +15,7 @@ const productsOnly = args.has("--products");
 const MOCKAPI_URL = process.env.MOCKAPI_URL || "https://6648f7ef4032b1331becf0f2.mockapi.io";
 
 const PRODUCT_FIELDS = ["article-name", "category", "color", "created-at", "description", "gender",
-    "id", "image-folder-name", "price", "purpose", "quantity", "size"];
+    "id", "image-folder-name", "images", "image-credits", "price", "purpose", "quantity", "size"];
 const USER_FIELDS = ["name", "email", "avatar", "createdAt", "user-role"];
 
 const pick = (obj, keys) => Object.fromEntries(keys.filter(k => obj[k] !== undefined && obj[k] !== null).map(k => [k, obj[k]]));

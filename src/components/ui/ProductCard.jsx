@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
-import { getProductImage } from "../../utils/getProductImage";
+import { getImageFor } from "../../utils/getProductImage";
 import { formatPrice } from "../../utils/format";
 
 export function ProductCard({ product, priority = false, badge }) {
-    const folder = product["image-folder-name"];
-    const primary = getProductImage(folder, 1);
-    const alt = getProductImage(folder, 2);
+    const primary = getImageFor(product, 1);
+    const alt = getImageFor(product, 2);
     const name = product["article-name"];
 
     return (

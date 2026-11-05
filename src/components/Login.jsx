@@ -84,7 +84,7 @@ function Login() {
             </div>
 
             <div className="flex flex-col px-6 py-10 sm:px-12">
-                <Link to="/" className="self-start" aria-label="Clodio Vendem home"><AcmeLogo /></Link>
+                <Link to="/" className="self-start" aria-label="Clodio Vendem home"><AcmeLogo height={38} /></Link>
 
                 <div className="mx-auto my-auto w-full max-w-md py-12">
                     {!auth && (
