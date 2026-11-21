@@ -7,6 +7,7 @@ import "@fontsource-variable/inter";
 import "@fontsource/anton";
 import "./index.css";
 import App from "./App";
+import { Analytics } from "@vercel/analytics/react";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -14,6 +15,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <NextThemesProvider attribute="class" defaultTheme="dark">
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <App />
+          <Analytics />
         </BrowserRouter>
       </NextThemesProvider>
     </NextUIProvider>
